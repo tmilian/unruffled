@@ -1,0 +1,32 @@
+name: unruffled_test
+
+publish_to: none
+
+version: 1.0.0
+
+environment:
+  sdk: '>=2.16.2 <3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  unruffled_flutter: any
+  json_annotation: ^4.5.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  build_runner: any
+  json_serializable: ^6.2.0
+  lints: ^1.0.0
+  test: ^1.16.0
+  unruffled_generator: any
+
+dependency_overrides:
+  unruffled_flutter:
+    path: ../unruffled_flutter
+  unruffled_generator:
+    path: ../unruffled_generator
+  test_api: ^0.4.9

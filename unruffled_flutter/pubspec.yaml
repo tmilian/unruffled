@@ -10,6 +10,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  isar_flutter_libs: any
+  unruffled:
+    path: ../unruffled
 
 dev_dependencies:
   flutter_test:

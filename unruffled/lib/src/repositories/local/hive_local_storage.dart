@@ -4,9 +4,8 @@ import 'package:hive/hive.dart';
 import 'package:recase/recase.dart';
 
 class HiveLocalStorage {
-  HiveLocalStorage({
-    List<int>? encryptionKey,
-  }) : encryptionCipher =
+  HiveLocalStorage({List<int>? encryptionKey})
+      : encryptionCipher =
             encryptionKey != null ? HiveAesCipher(encryptionKey) : null;
 
   final HiveAesCipher? encryptionCipher;

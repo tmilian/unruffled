@@ -3,4 +3,7 @@
 /// More dartdocs go here.
 library unruffled;
 
-export 'src/unruffled_base.dart';
+export 'src/unruffled.dart';
+export 'src/annotations/unruffled_data.dart';
+export 'src/models/data_adapter.dart';
+export 'src/models/data_model.dart';

@@ -1,0 +1,8 @@
+builders:
+  unruffled_generator:
+    import: "package:unruffled_generator/unruffled_generator.dart"
+    builder_factories: ["getUnruffledGenerator"]
+    build_extensions: { ".dart": ["unruffled_generator.g.part"] }
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: ["source_gen|combining_builder"]
