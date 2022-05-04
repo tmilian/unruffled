@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:hive/hive.dart';
 import 'package:unruffled/src/models/data_adapter.dart';
 import 'package:unruffled/src/models/data_model.dart';
+import 'package:unruffled/src/models/offline/offline_operation.dart';
 import 'package:unruffled/src/repositories/local/hive_local_storage.dart';
 import 'package:unruffled/src/repositories/remote/remote_repository.dart';
 import 'package:unruffled/src/unruffled_interface.dart';
@@ -66,5 +67,13 @@ class Unruffled extends UnruffledInterface {
       }
     }
     throw ("It seems that your class ${T.toString()} doesn't have a ${T.toString()}Adapter() registered");
+  }
+
+  Future<List<OfflineOperation>> get offlineOperations async {
+    List<OfflineOperation> operations = [];
+    for (var element in _remoteRepositories) {
+      operations.addAll(await element.offlineOperations);
+    }
+    return operations;
   }
 }

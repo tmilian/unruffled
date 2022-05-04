@@ -7,7 +7,7 @@ abstract class LocalRepository<T extends DataModel<T>> {
 
   void dispose();
 
-  Future<List<T>?> getAll();
+  Future<List<T>> getAll();
 
   Future<T?> get(String? key);
 

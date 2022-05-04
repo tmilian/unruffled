@@ -41,9 +41,8 @@ class LocalRepositoryImpl<T extends DataModel<T>> extends LocalRepository<T>
   }
 
   @override
-  Future<List<T>?> getAll() async {
-    var items = box?.values.toList() ?? [];
-    return items;
+  Future<List<T>> getAll() async {
+    return box?.values.toList() ?? [];
   }
 
   @override

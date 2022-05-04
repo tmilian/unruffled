@@ -4,76 +4,65 @@ import 'package:get_it/get_it.dart';
 import 'package:hive/hive.dart';
 import 'package:unruffled/src/models/data_adapter.dart';
 import 'package:unruffled/src/models/data_model.dart';
+import 'package:unruffled/src/models/offline/offline_operation.dart';
 import 'package:unruffled/src/repositories/local/hive_local_storage.dart';
-import 'package:unruffled/src/repositories/local/local_repository_interface.dart';
-import 'package:collection/collection.dart';
+import 'package:unruffled/src/repositories/remote/remote_repository.dart';
 
-class OfflineRepository<T extends DataModel<T>> extends LocalRepository<T>
-    with TypeAdapter<T> {
+class OfflineRepository<T extends DataModel<T>>
+    with TypeAdapter<OfflineOperation> {
   OfflineRepository({
+    required this.remoteRepository,
     required this.dataAdapter,
   });
 
   HiveLocalStorage get _hiveLocalStorage => GetIt.I.get();
 
+  final RemoteRepository<T> remoteRepository;
+
   final DataAdapter<T> dataAdapter;
 
-  Box<T>? box;
+  Box<OfflineOperation>? box;
 
   String get boxName => 'unruffled_offline_${dataAdapter.serviceName}';
 
-  @override
   Future<void> clear() async {
     await box?.clear();
   }
 
-  @override
-  Future<T> save(String key, T model) async {
-    await box?.put(key, model);
+  Future<OfflineOperation> save(OfflineOperation model) async {
+    await box?.put(model.key, model);
     return model;
   }
 
-  @override
-  Future<T?> delete(String key) async {
+  Future<OfflineOperation?> delete(String key) async {
     var obj = await get(key);
     await box?.delete(key);
     return obj;
   }
 
-  @override
-  Future<List<T>?> getAll() async {
-    var items = box?.values.toList() ?? [];
-    return items;
+  Future<List<OfflineOperation>> getAll() async {
+    return box?.values.toList() ?? [];
   }
 
-  @override
-  Future<T?> get(String? key) async {
+  Future<OfflineOperation?> get(String key) async {
     return box?.get(key);
   }
 
-  @override
-  Future<T?> getFromId(Object? id) async {
-    var models = await getAll();
-    return models?.firstWhereOrNull((model) => model.id == id);
-  }
-
-  @override
-  Future<LocalRepository<T>> initialize() async {
+  Future<OfflineRepository<T>> initialize() async {
     if (!Hive.isBoxOpen(boxName)) {
       if (!Hive.isAdapterRegistered(typeId)) {
         Hive.registerAdapter(this);
       }
     }
     try {
-      box = await _hiveLocalStorage.openBox<T>(boxName);
+      box = await _hiveLocalStorage.openBox<OfflineOperation>(boxName);
     } catch (e) {
       await _hiveLocalStorage.deleteBox(boxName);
-      box = await _hiveLocalStorage.openBox<T>(boxName);
+      box = await _hiveLocalStorage.openBox<OfflineOperation>(boxName);
     }
     return this;
   }
 
-  @override
   void dispose() {
     box?.close();
   }
@@ -85,18 +74,20 @@ class OfflineRepository<T extends DataModel<T>> extends LocalRepository<T>
   }
 
   @override
-  T read(BinaryReader reader) {
+  OfflineOperation read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <String, dynamic>{
       for (int i = 0; i < numOfFields; i++)
         reader.read().toString(): reader.read(),
     };
-    return dataAdapter.deserialize(fields);
+    var offline = OfflineOperation<T>.fromJson(fields);
+    offline.remoteRepository = remoteRepository;
+    return offline;
   }
 
   @override
-  void write(BinaryWriter writer, T obj) {
-    final map = dataAdapter.serialize(obj);
+  void write(BinaryWriter writer, OfflineOperation obj) {
+    final map = obj.toJson();
     writer.writeByte(map.keys.length);
     map.values.toList().asMap().forEach((index, value) {
       writer.writeByte(index);
