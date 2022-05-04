@@ -151,7 +151,7 @@ class RemoteRepository<T extends DataModel<T>> {
     } else {
       model = await localRepository.getFromId(key);
     }
-    if (remote) {
+    if (!remote) {
       return model;
     }
     return await sendRequest(

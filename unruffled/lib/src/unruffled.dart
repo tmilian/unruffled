@@ -13,11 +13,13 @@ class Unruffled extends UnruffledInterface {
     required String defaultBaseUrl,
     Map<String, dynamic>? defaultHeaders,
     List<int>? encryptionKey,
+    Dio? dio,
   }) {
-    GetIt.I.registerSingleton(Dio(BaseOptions(
-      baseUrl: defaultBaseUrl,
-      headers: defaultHeaders,
-    )));
+    GetIt.I.registerSingleton(dio ??
+        Dio(BaseOptions(
+          baseUrl: defaultBaseUrl,
+          headers: defaultHeaders,
+        )));
     GetIt.I.registerSingleton(HiveLocalStorage(encryptionKey: encryptionKey));
   }
 
@@ -39,25 +41,25 @@ class Unruffled extends UnruffledInterface {
 
   @override
   Future<T?> delete<T extends DataModel<T>>(String key) async {
-    return await _getRepository<T>().delete(key: key);
+    return await getRepository<T>().delete(key: key);
   }
 
   @override
   Future<List<T>?> getAll<T extends DataModel<T>>() async {
-    return await _getRepository<T>().getAll();
+    return await getRepository<T>().getAll();
   }
 
   @override
   Future<T?> get<T extends DataModel<T>>(String key) async {
-    return await _getRepository<T>().get(key: key);
+    return await getRepository<T>().get(key: key);
   }
 
   @override
   Future<T> post<T extends DataModel<T>>(T model) async {
-    return await _getRepository<T>().post(model: model);
+    return await getRepository<T>().post(model: model);
   }
 
-  RemoteRepository<T> _getRepository<T extends DataModel<T>>() {
+  RemoteRepository<T> getRepository<T extends DataModel<T>>() {
     for (var element in _remoteRepositories) {
       if (element is RemoteRepository<T>) {
         return element;

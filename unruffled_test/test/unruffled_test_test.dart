@@ -42,5 +42,6 @@ void main() async {
       .registerAdapter(UserAdapter())
       .registerAdapter(BookAdapter())
       .init();
+  unruffled.get<User>('frbizerbfr');
   print(await unruffled.getAll<User>());
 }
