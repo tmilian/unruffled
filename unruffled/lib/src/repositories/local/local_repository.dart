@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:get_it/get_it.dart';
 import 'package:hive/hive.dart';
-import 'package:unruffled/src/models/data_adapter.dart';
-import 'package:unruffled/src/models/data_model.dart';
+import 'package:unruffled/src/models/data/data_adapter.dart';
+import 'package:unruffled/src/models/data/data_model.dart';
 import 'package:unruffled/src/repositories/local/hive_local_storage.dart';
 import 'package:unruffled/src/repositories/local/local_repository_interface.dart';
 import 'package:collection/collection.dart';
@@ -53,7 +53,9 @@ class LocalRepositoryImpl<T extends DataModel<T>> extends LocalRepository<T>
   @override
   Future<T?> getFromId(Object? id) async {
     var models = await getAll();
-    return models?.firstWhereOrNull((model) => model.id == id);
+    return models.firstWhereOrNull(
+      (model) => model.id?.toString() == id?.toString(),
+    );
   }
 
   @override

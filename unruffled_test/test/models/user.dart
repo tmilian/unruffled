@@ -12,4 +12,8 @@ class User extends DataModel<User> {
   String surname;
 
   User({this.id, required this.name, required this.surname});
+
+  Map<String, dynamic> toJson() => _$UserToJson(this);
+
+  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 }

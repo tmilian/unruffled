@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:meta/meta.dart';
-import 'package:unruffled/src/models/data_exception.dart';
-import 'package:unruffled/src/models/data_model.dart';
-import 'package:unruffled/src/models/data_adapter.dart';
-import 'package:unruffled/src/models/deserialized_data.dart';
+import 'package:unruffled/src/models/data/data_exception.dart';
+import 'package:unruffled/src/models/data/data_model.dart';
+import 'package:unruffled/src/models/data/data_adapter.dart';
+import 'package:unruffled/src/models/data/deserialized_data.dart';
 import 'package:unruffled/src/models/offline/offline_operation.dart';
 import 'package:unruffled/src/repositories/internal/offline_repository.dart';
 import 'package:unruffled/src/repositories/local/local_repository_interface.dart';
@@ -34,12 +34,13 @@ class RemoteRepository<T extends DataModel<T>> {
   @protected
   String get serviceName => dataAdapter.serviceName;
 
-  @protected
   String url(
       {required RequestMethod method, Map<String, dynamic>? pathParams}) {
     switch (method) {
       case RequestMethod.GET:
-        return '/$serviceName/${pathParams?['id']}';
+        return pathParams == null
+            ? '/$serviceName'
+            : '/$serviceName/${pathParams['id']}';
       case RequestMethod.POST:
         return '/$serviceName';
       case RequestMethod.PATCH:
@@ -132,7 +133,7 @@ class RemoteRepository<T extends DataModel<T>> {
       return await localRepository.getAll();
     }
     return await sendRequest(
-      url: path ?? dataAdapter.serviceName,
+      url: path ?? url(method: RequestMethod.GET),
       method: RequestMethod.GET,
       headers: headers,
       query: query,
@@ -165,18 +166,19 @@ class RemoteRepository<T extends DataModel<T>> {
     OnError<T?>? onError,
     OnOfflineException? onOfflineException,
   }) async {
-    T? model;
-    if (key.toString().startsWith(tempKey)) {
-      model = await localRepository.get(key.toString());
-    } else {
-      model = await localRepository.getFromId(key);
-    }
-    if (local) {
+    var isLocalModel = key.toString().startsWith(tempKey);
+    T? model = isLocalModel
+        ? await localRepository.get(key.toString())
+        : await localRepository.getFromId(key);
+    if (local || isLocalModel) {
+      if (model == null) {
+        await _onError(DataException('No ${T.toString()} model with key $key'));
+      }
       return model;
     }
     return await sendRequest(
-      url:
-          path ?? url(method: RequestMethod.GET, pathParams: {'id': model?.id}),
+      url: path ??
+          url(method: RequestMethod.GET, pathParams: {'id': model?.id ?? key}),
       method: RequestMethod.GET,
       headers: headers,
       query: query,
@@ -188,7 +190,12 @@ class RemoteRepository<T extends DataModel<T>> {
         }
         return model;
       },
-      onError: (e) async => onError?.call(e) ?? _onError(e),
+      onError: (e) async {
+        if (model != null) {
+          await localRepository.delete(model.key);
+        }
+        return await (onError?.call(e) ?? _onError(e));
+      },
       onOfflineException: () async {
         onOfflineException?.call();
         return model;

@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:unruffled/src/models/data_model.dart';
+import 'package:unruffled/src/models/data/data_model.dart';
 import 'package:unruffled/src/repositories/remote/remote_repository.dart';
 import 'package:uuid/uuid.dart';
 

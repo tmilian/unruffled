@@ -1,14 +1,13 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hive/hive.dart';
-import 'package:unruffled/src/models/data_adapter.dart';
-import 'package:unruffled/src/models/data_model.dart';
+import 'package:unruffled/src/models/data/data_adapter.dart';
+import 'package:unruffled/src/models/data/data_model.dart';
 import 'package:unruffled/src/models/offline/offline_operation.dart';
 import 'package:unruffled/src/repositories/local/hive_local_storage.dart';
 import 'package:unruffled/src/repositories/remote/remote_repository.dart';
-import 'package:unruffled/src/unruffled_interface.dart';
 
-class Unruffled extends UnruffledInterface {
+class Unruffled {
   Unruffled({
     required this.baseDirectory,
     required String defaultBaseUrl,
@@ -16,6 +15,8 @@ class Unruffled extends UnruffledInterface {
     List<int>? encryptionKey,
     Dio? dio,
   }) {
+    dio?.options.baseUrl = defaultBaseUrl;
+    dio?.options.headers = defaultHeaders;
     GetIt.I.registerSingleton(dio ??
         Dio(BaseOptions(
           baseUrl: defaultBaseUrl,
@@ -40,27 +41,7 @@ class Unruffled extends UnruffledInterface {
     return this;
   }
 
-  @override
-  Future<T?> delete<T extends DataModel<T>>(String key) async {
-    return await getRepository<T>().delete(key: key);
-  }
-
-  @override
-  Future<List<T>?> getAll<T extends DataModel<T>>() async {
-    return await getRepository<T>().getAll();
-  }
-
-  @override
-  Future<T?> get<T extends DataModel<T>>(String key) async {
-    return await getRepository<T>().get(key: key);
-  }
-
-  @override
-  Future<T> post<T extends DataModel<T>>(T model) async {
-    return await getRepository<T>().post(model: model);
-  }
-
-  RemoteRepository<T> getRepository<T extends DataModel<T>>() {
+  RemoteRepository<T> repository<T extends DataModel<T>>() {
     for (var element in _remoteRepositories) {
       if (element is RemoteRepository<T>) {
         return element;

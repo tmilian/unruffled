@@ -12,16 +12,17 @@ dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter
-  unruffled_flutter: any
   json_annotation: ^4.5.0
+  unruffled_flutter: any
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   build_runner: any
+  http_mock_adapter: ^0.3.2
   json_serializable: ^6.2.0
   lints: ^1.0.0
-  test: ^1.16.0
+  test: ^1.21.1
   unruffled_generator: any
 
 dependency_overrides:

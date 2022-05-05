@@ -1,5 +1,5 @@
 import 'package:collection/collection.dart';
-import 'package:unruffled/src/models/data_model.dart';
+import 'package:unruffled/src/models/data/data_model.dart';
 
 class DeserializedData<T> {
   const DeserializedData(this.models, {this.included = const []});

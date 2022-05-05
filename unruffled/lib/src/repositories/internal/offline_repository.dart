@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:get_it/get_it.dart';
 import 'package:hive/hive.dart';
-import 'package:unruffled/src/models/data_adapter.dart';
-import 'package:unruffled/src/models/data_model.dart';
+import 'package:unruffled/src/models/data/data_adapter.dart';
+import 'package:unruffled/src/models/data/data_model.dart';
 import 'package:unruffled/src/models/offline/offline_operation.dart';
 import 'package:unruffled/src/repositories/local/hive_local_storage.dart';
 import 'package:unruffled/src/repositories/remote/remote_repository.dart';
