@@ -21,8 +21,6 @@ class OfflineOperation<T extends DataModel<T>> {
   final Map<String, String>? headers;
   final Map<String, dynamic>? query;
   final Map<String, dynamic>? body;
-  @JsonKey(ignore: true)
-  late RemoteRepository<T> remoteRepository;
 
   OfflineOperation({
     String? key,
@@ -39,13 +37,13 @@ class OfflineOperation<T extends DataModel<T>> {
   factory OfflineOperation.fromJson(Map<String, dynamic> json) =>
       _$OfflineOperationFromJson(json);
 
-  Future<void> retry() async {
+  Future<void> retry(RemoteRepository<T> remoteRepository) async {
     var model = await remoteRepository.get(key: modelKey, local: true);
     if (model == null) {
       throw ('Error no model found for key $modelKey');
     }
     switch (type) {
-      case OfflineOperationType.POST:
+      case OfflineOperationType.post:
         await remoteRepository.post(
           model: model,
           path: path,
@@ -54,7 +52,7 @@ class OfflineOperation<T extends DataModel<T>> {
           body: body,
         );
         break;
-      case OfflineOperationType.PATCH:
+      case OfflineOperationType.patch:
         await remoteRepository.patch(
           model: model,
           path: path,
@@ -63,7 +61,7 @@ class OfflineOperation<T extends DataModel<T>> {
           body: body,
         );
         break;
-      case OfflineOperationType.PUT:
+      case OfflineOperationType.put:
         await remoteRepository.put(
           model: model,
           path: path,
@@ -72,7 +70,7 @@ class OfflineOperation<T extends DataModel<T>> {
           body: body,
         );
         break;
-      case OfflineOperationType.DELETE:
+      case OfflineOperationType.delete:
         await remoteRepository.delete(
           key: modelKey,
           path: path,
@@ -85,4 +83,4 @@ class OfflineOperation<T extends DataModel<T>> {
   }
 }
 
-enum OfflineOperationType { POST, PATCH, PUT, DELETE }
+enum OfflineOperationType { post, patch, put, delete }

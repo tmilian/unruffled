@@ -3,9 +3,13 @@ import 'dart:async';
 import 'package:unruffled/unruffled.dart';
 
 abstract class LocalRepository<T extends DataModel<T>> {
+  LocalRepository(this.dataAdapter);
+
   Future<LocalRepository<T>> initialize();
 
-  void dispose();
+  Future<void> dispose();
+
+  DataAdapter<T> dataAdapter;
 
   Future<List<T>> getAll();
 

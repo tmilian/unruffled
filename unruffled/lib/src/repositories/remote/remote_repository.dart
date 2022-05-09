@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
-import 'package:get_it/get_it.dart';
 import 'package:meta/meta.dart';
 import 'package:unruffled/src/models/data/data_exception.dart';
 import 'package:unruffled/src/models/data/data_model.dart';
@@ -10,20 +9,18 @@ import 'package:unruffled/src/models/data/deserialized_data.dart';
 import 'package:unruffled/src/models/offline/offline_operation.dart';
 import 'package:unruffled/src/repositories/internal/offline_repository.dart';
 import 'package:unruffled/src/repositories/local/local_repository_interface.dart';
-import 'package:unruffled/src/repositories/local/local_repository.dart';
 
 class RemoteRepository<T extends DataModel<T>> {
   RemoteRepository({
-    required this.dataAdapter,
-  }) : localRepository = LocalRepositoryImpl<T>(dataAdapter: dataAdapter) {
+    required this.localRepository,
+    required this.dio,
+  }) {
     offlineRepository = OfflineRepository<T>(
-      remoteRepository: this,
       dataAdapter: dataAdapter,
     );
   }
 
-  @protected
-  final DataAdapter<T> dataAdapter;
+  final Dio dio;
 
   @protected
   final LocalRepository<T> localRepository;
@@ -32,22 +29,38 @@ class RemoteRepository<T extends DataModel<T>> {
   late OfflineRepository<T> offlineRepository;
 
   @protected
+  DataAdapter<T> get dataAdapter => localRepository.dataAdapter;
+
+  @protected
   String get serviceName => dataAdapter.serviceName;
 
-  String url(
-      {required RequestMethod method, Map<String, dynamic>? pathParams}) {
+  bool get isInitialized => _isInit;
+
+  var _isInit = false;
+
+  Future<RemoteRepository<T>> initialize() async {
+    await localRepository.initialize();
+    await offlineRepository.initialize();
+    _isInit = true;
+    return this;
+  }
+
+  String url({
+    required RequestMethod method,
+    Map<String, dynamic>? pathParams,
+  }) {
     switch (method) {
-      case RequestMethod.GET:
+      case RequestMethod.get:
         return pathParams == null
             ? '/$serviceName'
             : '/$serviceName/${pathParams['id']}';
-      case RequestMethod.POST:
+      case RequestMethod.post:
         return '/$serviceName';
-      case RequestMethod.PATCH:
+      case RequestMethod.patch:
         return '/$serviceName/${pathParams?['id']}';
-      case RequestMethod.PUT:
+      case RequestMethod.put:
         return '/$serviceName/${pathParams?['id']}';
-      case RequestMethod.DELETE:
+      case RequestMethod.delete:
         return '/$serviceName/${pathParams?['id']}';
     }
   }
@@ -77,45 +90,43 @@ class RemoteRepository<T extends DataModel<T>> {
     return dataAdapter.serialize(model);
   }
 
-  Dio get dio => GetIt.I.get();
-
   Future<T?> delete({
     required String key,
     String? path,
-    bool local = false,
     Map<String, String>? headers,
     Map<String, dynamic>? query,
     Map<String, dynamic>? body,
-    OnError<T?>? onError,
-    OnOfflineException? onOfflineException,
+    OfflineExceptionCallback? onOfflineException,
   }) async {
     var model = await localRepository.delete(key);
-    if (local) {
+    final offlineOperation = OfflineOperation<T>(
+      type: OfflineOperationType.delete,
+      modelKey: model?.key ?? '',
+      path: path,
+      headers: headers,
+      query: query,
+      body: body,
+    );
+    var isLocalModel = key.toString().startsWith(tempKey);
+    if (isLocalModel) {
+      await offlineRepository.save(offlineOperation);
       return model;
     }
     return await sendRequest(
       url: path ??
-          url(method: RequestMethod.DELETE, pathParams: {'id': model?.id}),
-      method: RequestMethod.DELETE,
+          url(method: RequestMethod.delete, pathParams: {'id': model?.id}),
+      method: RequestMethod.delete,
       headers: headers,
       query: query,
       onSuccess: (data) async {
         var deserialized = deserialize(data);
+        await offlineRepository.delete(offlineOperation);
         return deserialized.model;
       },
-      onError: (e) async => onError?.call(e) ?? _onError(e),
+      onError: (e) async => _onError(e),
       onOfflineException: () async {
         onOfflineException?.call();
-        await offlineRepository.save(
-          OfflineOperation<T>(
-            type: OfflineOperationType.DELETE,
-            modelKey: model!.key,
-            path: path,
-            headers: headers,
-            query: query,
-            body: body,
-          ),
-        );
+        await offlineRepository.save(offlineOperation);
         return model;
       },
     );
@@ -126,15 +137,14 @@ class RemoteRepository<T extends DataModel<T>> {
     bool local = false,
     Map<String, String>? headers,
     Map<String, dynamic>? query,
-    OnError<List<T>>? onError,
-    OnOfflineException? onOfflineException,
+    OfflineExceptionCallback? onOfflineException,
   }) async {
     if (local) {
       return await localRepository.getAll();
     }
     return await sendRequest(
-      url: path ?? url(method: RequestMethod.GET),
-      method: RequestMethod.GET,
+      url: path ?? url(method: RequestMethod.get),
+      method: RequestMethod.get,
       headers: headers,
       query: query,
       onSuccess: (data) async {
@@ -144,7 +154,7 @@ class RemoteRepository<T extends DataModel<T>> {
         }
         return deserialized.models;
       },
-      onError: (e) async => onError?.call(e) ?? _onError(e),
+      onError: (e) async => _onError(e),
       onOfflineException: () async {
         onOfflineException?.call();
         return await getAll(local: true);
@@ -163,8 +173,7 @@ class RemoteRepository<T extends DataModel<T>> {
     bool local = false,
     Map<String, String>? headers,
     Map<String, dynamic>? query,
-    OnError<T?>? onError,
-    OnOfflineException? onOfflineException,
+    OfflineExceptionCallback? onOfflineException,
   }) async {
     var isLocalModel = key.toString().startsWith(tempKey);
     T? model = isLocalModel
@@ -178,8 +187,8 @@ class RemoteRepository<T extends DataModel<T>> {
     }
     return await sendRequest(
       url: path ??
-          url(method: RequestMethod.GET, pathParams: {'id': model?.id ?? key}),
-      method: RequestMethod.GET,
+          url(method: RequestMethod.get, pathParams: {'id': model?.id ?? key}),
+      method: RequestMethod.get,
       headers: headers,
       query: query,
       onSuccess: (data) async {
@@ -194,7 +203,7 @@ class RemoteRepository<T extends DataModel<T>> {
         if (model != null) {
           await localRepository.delete(model.key);
         }
-        return await (onError?.call(e) ?? _onError(e));
+        return _onError(e);
       },
       onOfflineException: () async {
         onOfflineException?.call();
@@ -206,19 +215,24 @@ class RemoteRepository<T extends DataModel<T>> {
   Future<T> post({
     required T model,
     String? path,
-    bool local = false,
     Map<String, String>? headers,
     Map<String, dynamic>? query,
     Map<String, dynamic>? body,
     bool remote = false,
-    OnError<T?>? onError,
-    OnOfflineException? onOfflineException,
+    OfflineExceptionCallback? onOfflineException,
   }) async {
+    final offlineOperation = OfflineOperation<T>(
+      type: OfflineOperationType.post,
+      modelKey: model.key,
+      path: path,
+      headers: headers,
+      query: query,
+      body: body,
+    );
     await localRepository.save(model.key, model);
-    if (local) return model;
     var result = await sendRequest<T>(
-      url: path ?? url(method: RequestMethod.POST),
-      method: RequestMethod.POST,
+      url: path ?? url(method: RequestMethod.post),
+      method: RequestMethod.post,
       headers: headers,
       query: query,
       onSuccess: (data) async {
@@ -228,21 +242,13 @@ class RemoteRepository<T extends DataModel<T>> {
           await localRepository.delete(model.key);
           await localRepository.save(newModel.key, newModel);
         }
+        await offlineRepository.delete(offlineOperation);
         return newModel;
       },
-      onError: (e) async => onError?.call(e) ?? _onError(e),
+      onError: (e) async => _onError(e),
       onOfflineException: () async {
         onOfflineException?.call();
-        await offlineRepository.save(
-          OfflineOperation<T>(
-            type: OfflineOperationType.POST,
-            modelKey: model.key,
-            path: path,
-            headers: headers,
-            query: query,
-            body: body,
-          ),
-        );
+        await offlineRepository.save(offlineOperation);
         return model;
       },
     );
@@ -252,41 +258,43 @@ class RemoteRepository<T extends DataModel<T>> {
   Future<T> put({
     required T model,
     String? path,
-    bool local = false,
     Map<String, String>? headers,
     Map<String, dynamic>? query,
     Map<String, dynamic>? body,
     bool remote = false,
-    OnError<T?>? onError,
-    OnOfflineException? onOfflineException,
+    OfflineExceptionCallback? onOfflineException,
   }) async {
+    final offlineOperation = OfflineOperation<T>(
+      type: OfflineOperationType.put,
+      modelKey: model.key,
+      path: path,
+      headers: headers,
+      query: query,
+      body: body,
+    );
     await localRepository.save(model.key, model);
-    if (local) return model;
+    var isLocalModel = model.key.toString().startsWith(tempKey);
+    if (isLocalModel) {
+      await offlineRepository.save(offlineOperation);
+      return model;
+    }
     var result = await sendRequest<T>(
       url: path ??
           url(
-              method: RequestMethod.PUT,
+              method: RequestMethod.put,
               pathParams: {'id': model.id.toString()}),
-      method: RequestMethod.PUT,
+      method: RequestMethod.put,
       headers: headers,
       query: query,
       onSuccess: (data) async {
         var deserialized = deserialize(data);
+        await offlineRepository.delete(offlineOperation);
         return deserialized.model;
       },
-      onError: (e) async => onError?.call(e) ?? _onError(e),
+      onError: (e) async => _onError(e),
       onOfflineException: () async {
         onOfflineException?.call();
-        await offlineRepository.save(
-          OfflineOperation<T>(
-            type: OfflineOperationType.PUT,
-            modelKey: model.key,
-            path: path,
-            headers: headers,
-            query: query,
-            body: body,
-          ),
-        );
+        await offlineRepository.save(offlineOperation);
         return model;
       },
     );
@@ -296,61 +304,58 @@ class RemoteRepository<T extends DataModel<T>> {
   Future<T> patch({
     required T model,
     String? path,
-    bool local = false,
     Map<String, String>? headers,
     Map<String, dynamic>? query,
     Map<String, dynamic>? body,
     bool remote = false,
-    OnError<T?>? onError,
-    OnOfflineException? onOfflineException,
+    OfflineExceptionCallback? onOfflineException,
   }) async {
+    final offlineOperation = OfflineOperation<T>(
+      type: OfflineOperationType.patch,
+      modelKey: model.key,
+      path: path,
+      headers: headers,
+      query: query,
+      body: body,
+    );
     await localRepository.save(model.key, model);
-    if (local) return model;
+    var isLocalModel = model.key.toString().startsWith(tempKey);
+    if (isLocalModel) {
+      await offlineRepository.save(offlineOperation);
+      return model;
+    }
     var result = await sendRequest<T>(
       url: path ??
           url(
-              method: RequestMethod.PATCH,
+              method: RequestMethod.patch,
               pathParams: {'id': model.id.toString()}),
-      method: RequestMethod.PATCH,
+      method: RequestMethod.patch,
       headers: headers,
       query: query,
       onSuccess: (data) async {
         var deserialized = deserialize(data);
+        await offlineRepository.delete(offlineOperation);
         return deserialized.model;
       },
-      onError: (e) async => onError?.call(e) ?? _onError(e),
+      onError: (e) async => _onError(e),
       onOfflineException: () async {
         onOfflineException?.call();
-        await offlineRepository.save(
-          OfflineOperation<T>(
-            type: OfflineOperationType.PATCH,
-            modelKey: model.key,
-            path: path,
-            headers: headers,
-            query: query,
-            body: body,
-          ),
-        );
+        await offlineRepository.save(offlineOperation);
         return model;
       },
     );
     return result ?? model;
   }
 
-  Future<RemoteRepository<T>> initialize() async {
-    await localRepository.initialize();
-    return this;
-  }
-
   Future<R?> sendRequest<R>({
     required String url,
-    RequestMethod method = RequestMethod.GET,
+    RequestMethod method = RequestMethod.get,
     Map<String, String>? headers,
     Map<String, dynamic>? query,
     Map<String, dynamic>? body,
     required OnSuccess<R> onSuccess,
     required OnError<R> onError,
-    OnOfflineException? onOfflineException,
+    OnOfflineException<R>? onOfflineException,
   }) async {
     try {
       final response = await dio.fetch<Map<String, dynamic>>(
@@ -364,16 +369,17 @@ class RemoteRepository<T extends DataModel<T>> {
       );
       return onSuccess(response.data);
     } on DioError catch (e) {
-      if (_isConnectivityError(e)) {
+      if (_isConnectivityError(e.error)) {
         return await onOfflineException?.call();
+      } else {
+        final dataException = DataException(e,
+            stackTrace: e.stackTrace, statusCode: e.response?.statusCode);
+        return await onError(dataException);
       }
-      final dataException = DataException(e,
-          stackTrace: e.stackTrace, statusCode: e.response?.statusCode);
-      return await onError(dataException);
     }
   }
 
-  Future<List<OfflineOperation>> get offlineOperations {
+  List<OfflineOperation> get offlineOperations {
     return offlineRepository.getAll();
   }
 
@@ -386,13 +392,13 @@ class RemoteRepository<T extends DataModel<T>> {
     // also socket exceptions
     // we check the exception like this in order not to import `dart:io`
     final _err = error.toString();
-    return _err.startsWith('SocketException') ||
-        _err.startsWith('Connection closed before full header was received') ||
-        _err.startsWith('HandshakeException');
+    return _err.contains('SocketException') ||
+        _err.contains('Connection closed before full header was received') ||
+        _err.contains('HandshakeException');
   }
 
-  void dispose() {
-    localRepository.dispose();
+  Future<void> dispose() async {
+    await localRepository.dispose();
   }
 }
 
@@ -400,12 +406,14 @@ typedef OnSuccess<R> = Future<R?> Function(Object? data);
 
 typedef OnError<R> = Future<R?> Function(DataException e);
 
-typedef OnOfflineException = Function();
+typedef OnOfflineException<R> = Future<R?> Function();
+
+typedef OfflineExceptionCallback = Function();
 
 enum RequestMethod {
-  GET,
-  POST,
-  PATCH,
-  PUT,
-  DELETE,
+  get,
+  post,
+  patch,
+  put,
+  delete,
 }

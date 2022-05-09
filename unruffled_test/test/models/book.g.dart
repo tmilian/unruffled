@@ -7,6 +7,7 @@ part of 'book.dart';
 // **************************************************************************
 
 Book _$BookFromJson(Map<String, dynamic> json) => Book(
+      key: json['key'] as String?,
       id: json['id'] as int?,
       title: json['title'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),
@@ -14,6 +15,7 @@ Book _$BookFromJson(Map<String, dynamic> json) => Book(
 
 Map<String, dynamic> _$BookToJson(Book instance) => <String, dynamic>{
       'id': instance.id,
+      'key': instance.key,
       'title': instance.title,
       'createdAt': instance.createdAt.toIso8601String(),
     };

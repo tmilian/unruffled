@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:get_it/get_it.dart';
 import 'package:hive/hive.dart';
 import 'package:recase/recase.dart';
 
@@ -8,8 +9,17 @@ class HiveLocalStorage {
       : encryptionCipher =
             encryptionKey != null ? HiveAesCipher(encryptionKey) : null;
 
+  static HiveLocalStorage get to => GetIt.I.get();
+
   final HiveAesCipher? encryptionCipher;
-  bool isInitialized = false;
+
+  bool get isInitialized => _isInit;
+
+  bool _isInit = false;
+
+  Future<void> initialized() async {
+    _isInit = true;
+  }
 
   Future<Box<B>> openBox<B>(String name) async {
     return await Hive.openBox<B>(
