@@ -8,7 +8,7 @@ import 'package:unruffled/src/models/data/data_adapter.dart';
 import 'package:unruffled/src/models/data/deserialized_data.dart';
 import 'package:unruffled/src/models/offline/offline_operation.dart';
 import 'package:unruffled/src/repositories/internal/offline_repository.dart';
-import 'package:unruffled/src/repositories/local/local_repository_interface.dart';
+import 'package:unruffled/src/repositories/local/local_repository.dart';
 
 class RemoteRepository<T extends DataModel<T>> {
   RemoteRepository({

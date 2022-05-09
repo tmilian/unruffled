@@ -8,7 +8,7 @@ import 'package:unruffled/src/repositories/internal/type_manager.dart';
 import 'package:unruffled/src/repositories/local/hive_local_storage.dart';
 import 'package:unruffled/src/repositories/remote/remote_repository.dart';
 
-import 'repositories/local/local_repository.dart';
+import 'repositories/local/local_repository_impl.dart';
 
 class Unruffled {
   Unruffled({
