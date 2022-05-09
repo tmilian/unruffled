@@ -7,6 +7,7 @@ environment:
   sdk: '>=2.16.2 <3.0.0'
 
 dependencies:
+  collection: ^1.16.0
   dio: ^4.0.6
   hive: ^2.1.0
   get_it: ^7.2.0
