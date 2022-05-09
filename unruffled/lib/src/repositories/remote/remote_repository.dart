@@ -90,6 +90,19 @@ class RemoteRepository<T extends DataModel<T>> {
     return dataAdapter.serialize(model);
   }
 
+  /// Delete a model
+  ///
+  /// [key] is required (use your model.key)
+  ///
+  /// Delete local model by default and attempt to delete model on remote
+  /// server.
+  ///
+  /// If a connectivity issue occurs :
+  /// - When id is not null, create a DELETE offline operation to allow you to
+  /// retry operation later.
+  /// - When id is null, all offline operations related to this model are
+  /// deleted to prevent server side object creation.
+  ///
   Future<T?> delete({
     required String key,
     String? path,
@@ -132,6 +145,8 @@ class RemoteRepository<T extends DataModel<T>> {
     );
   }
 
+  /// Get all objects
+  ///
   Future<List<T>?> getAll({
     String? path,
     bool local = false,
@@ -164,8 +179,7 @@ class RemoteRepository<T extends DataModel<T>> {
 
   /// GET specific object
   ///
-  /// key is required and can be your model.id or your model.key (if you need to
-  /// retrieve a local object that does not exist on your server)
+  /// [key] is required (use your model.key)
   ///
   Future<T?> get({
     required Object key,
@@ -212,6 +226,16 @@ class RemoteRepository<T extends DataModel<T>> {
     );
   }
 
+  /// Create object
+  ///
+  /// [model] is required
+  ///
+  /// Create local [model] by default and attempt to create [model] on remote
+  /// server.
+  ///
+  /// If a connectivity issue occurs, create on offline operation to allow you
+  /// to retry operation later.
+  ///
   Future<T> post({
     required T model,
     String? path,
@@ -255,6 +279,19 @@ class RemoteRepository<T extends DataModel<T>> {
     return result ?? model;
   }
 
+  /// Edit a model
+  ///
+  /// [model] is required
+  ///
+  /// Edit local model by default and attempt to edit model on remote
+  /// server.
+  ///
+  /// If a connectivity issue occurs :
+  /// - When id is not null, create a PUT offline operation to allow you to
+  /// retry operation later.
+  /// - When id is null, we attempt to modify an existing POST operation related
+  /// to this [model] key.
+  ///
   Future<T> put({
     required T model,
     String? path,
@@ -301,6 +338,19 @@ class RemoteRepository<T extends DataModel<T>> {
     return result ?? model;
   }
 
+  /// Edit a model
+  ///
+  /// [model] is required
+  ///
+  /// Edit local model by default and attempt to edit model on remote
+  /// server.
+  ///
+  /// If a connectivity issue occurs :
+  /// - When id is not null, create a PUT offline operation to allow you to
+  /// retry operation later.
+  /// - When id is null, we attempt to modify an existing POST operation related
+  /// to this [model] key.
+  ///
   Future<T> patch({
     required T model,
     String? path,
@@ -388,9 +438,7 @@ class RemoteRepository<T extends DataModel<T>> {
   }
 
   bool _isConnectivityError(Object? error) {
-    // timeouts via http's `connectionTimeout` are
-    // also socket exceptions
-    // we check the exception like this in order not to import `dart:io`
+    // Try to detect connectivity error without importing dart:io
     final _err = error.toString();
     return _err.contains('SocketException') ||
         _err.contains('Connection closed before full header was received') ||
