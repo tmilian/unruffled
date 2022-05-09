@@ -60,6 +60,11 @@ class Unruffled {
     throw ("It seems that your class ${T.toString()} doesn't have a ${T.toString()}Adapter() registered");
   }
 
+  Map<RemoteRepository, List<OfflineOperation>> get offlineOperations =>
+      _remoteRepositories
+          .asMap()
+          .map((index, e) => MapEntry(e, e.offlineOperations));
+
   Future<void> dispose() async {
     for (var remote in _remoteRepositories) {
       await remote.dispose();
@@ -67,13 +72,5 @@ class Unruffled {
     GetIt.I.unregister<TypeManager>();
     GetIt.I.unregister<HiveLocalStorage>();
     _remoteRepositories.clear();
-  }
-
-  Future<List<OfflineOperation>> get offlineOperations async {
-    List<OfflineOperation> operations = [];
-    for (var element in _remoteRepositories) {
-      operations.addAll(await element.offlineOperations);
-    }
-    return operations;
   }
 }
