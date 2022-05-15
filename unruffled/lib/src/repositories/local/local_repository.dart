@@ -1,6 +1,4 @@
-import 'dart:async';
-
-import 'package:unruffled/unruffled.dart';
+part of unruffled;
 
 abstract class LocalRepository<T extends DataModel<T>> {
   LocalRepository(this.dataAdapter);
@@ -11,7 +9,7 @@ abstract class LocalRepository<T extends DataModel<T>> {
 
   DataAdapter<T> dataAdapter;
 
-  Future<List<T>> getAll();
+  Future<List<T>> getAll({QueryBuilder<T>? queryBuilder});
 
   Future<T?> get(String? key);
 

@@ -1,12 +1,4 @@
-import 'dart:async';
-
-import 'package:hive/hive.dart';
-import 'package:unruffled/src/models/data/data_adapter.dart';
-import 'package:unruffled/src/models/data/data_model.dart';
-import 'package:unruffled/src/models/offline/offline_operation.dart';
-import 'package:unruffled/src/repositories/internal/type_manager.dart';
-import 'package:unruffled/src/repositories/local/hive_local_storage.dart';
-import 'package:collection/collection.dart';
+part of unruffled;
 
 class OfflineRepository<T extends DataModel<T>>
     with TypeAdapter<OfflineOperation> {

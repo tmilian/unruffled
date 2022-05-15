@@ -33,8 +33,8 @@ Map<String, dynamic> _$OfflineOperationToJson<T extends DataModel<T>>(
     };
 
 const _$OfflineOperationTypeEnumMap = {
-  OfflineOperationType.post: 'POST',
-  OfflineOperationType.patch: 'PATCH',
-  OfflineOperationType.put: 'PUT',
-  OfflineOperationType.delete: 'DELETE',
+  OfflineOperationType.post: 'post',
+  OfflineOperationType.patch: 'patch',
+  OfflineOperationType.put: 'put',
+  OfflineOperationType.delete: 'delete',
 };

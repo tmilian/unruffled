@@ -1,15 +1,7 @@
-import 'dart:async';
-
-import 'package:hive/hive.dart';
-import 'package:unruffled/src/models/data/data_adapter.dart';
-import 'package:unruffled/src/models/data/data_model.dart';
-import 'package:unruffled/src/repositories/internal/type_manager.dart';
-import 'package:unruffled/src/repositories/local/hive_local_storage.dart';
-import 'package:unruffled/src/repositories/local/local_repository.dart';
-import 'package:collection/collection.dart';
+part of unruffled;
 
 class LocalRepositoryImpl<T extends DataModel<T>> extends LocalRepository<T>
-    with TypeAdapter<T> {
+    with TypeAdapter<T>, LocalQueryParser<List<T>, T> {
   LocalRepositoryImpl({
     required DataAdapter<T> dataAdapter,
   }) : super(dataAdapter);
@@ -37,8 +29,22 @@ class LocalRepositoryImpl<T extends DataModel<T>> extends LocalRepository<T>
   }
 
   @override
-  Future<List<T>> getAll() async {
-    return box?.values.toList() ?? [];
+  Future<List<T>> getAll({QueryBuilder<T>? queryBuilder}) async {
+    var values = box?.values.toList() ?? [];
+    if (queryBuilder != null) {
+      values = parse(
+        data: values,
+        queryBuilder: queryBuilder,
+        orParser: (list) {
+          return list.toSet().expand((element) => element).toList();
+        },
+        andParser: (list) => list
+            .map((e) => e.toSet())
+            .reduce((a, b) => a.intersection(b))
+            .toList(),
+      );
+    }
+    return values;
   }
 
   @override
@@ -98,5 +104,53 @@ class LocalRepositoryImpl<T extends DataModel<T>> extends LocalRepository<T>
       writer.write(key);
       writer.write(value);
     });
+  }
+
+  @override
+  List<T> parseEqual(FilterCondition<T> condition, List<T> object) {
+    return object.where((model) {
+      final property = getProperty(condition, dataAdapter.serialize(model));
+      return property == condition.value;
+    }).toList();
+  }
+
+  @override
+  List<T> parseGreaterThan(FilterCondition<T> condition, List<T> object) {
+    return object.where((model) {
+      final value = condition.value;
+      final property = getProperty(condition, dataAdapter.serialize(model));
+      if (property is num && value is num) {
+        return condition.include ? property >= value : property > value;
+      }
+      return false;
+    }).toList();
+  }
+
+  @override
+  List<T> parseInValues(FilterCondition<T> condition, List<T> object) {
+    return object.where((model) {
+      final property = getProperty(condition, dataAdapter.serialize(model));
+      return condition.values.contains(property);
+    }).toList();
+  }
+
+  @override
+  List<T> parseLessThan(FilterCondition<T> condition, List<T> object) {
+    return object.where((model) {
+      final value = condition.value;
+      final property = getProperty(condition, dataAdapter.serialize(model));
+      if (property is num && value is num) {
+        return condition.include ? property <= value : property < value;
+      }
+      return false;
+    }).toList();
+  }
+
+  @override
+  List<T> parseNotEqual(FilterCondition<T> condition, List<T> object) {
+    return object.where((model) {
+      final property = getProperty(condition, dataAdapter.serialize(model));
+      return property != condition.value;
+    }).toList();
   }
 }

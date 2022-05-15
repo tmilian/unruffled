@@ -1,35 +1,23 @@
-import 'dart:async';
+part of unruffled;
 
-import 'package:dio/dio.dart';
-import 'package:meta/meta.dart';
-import 'package:unruffled/src/models/data/data_exception.dart';
-import 'package:unruffled/src/models/data/data_model.dart';
-import 'package:unruffled/src/models/data/data_adapter.dart';
-import 'package:unruffled/src/models/data/deserialized_data.dart';
-import 'package:unruffled/src/models/offline/offline_operation.dart';
-import 'package:unruffled/src/repositories/internal/offline_repository.dart';
-import 'package:unruffled/src/repositories/local/local_repository.dart';
+class RemoteRepository<T extends DataModel<T>> = _RemoteRepository<T>
+    with _RemoteQueryParser<T>;
 
-class RemoteRepository<T extends DataModel<T>> {
-  RemoteRepository({
-    required this.localRepository,
-    required this.dio,
-  }) {
-    offlineRepository = OfflineRepository<T>(
-      dataAdapter: dataAdapter,
-    );
+abstract class _RemoteRepository<T extends DataModel<T>> {
+  _RemoteRepository(this.dataAdapter) {
+    localRepository = LocalRepositoryImpl<T>(dataAdapter: dataAdapter);
+    offlineRepository = OfflineRepository<T>(dataAdapter: dataAdapter);
   }
 
-  final Dio dio;
+  final Dio dio = GetIt.I.get();
+
+  final DataAdapter<T> dataAdapter;
 
   @protected
-  final LocalRepository<T> localRepository;
+  late LocalRepository<T> localRepository;
 
   @protected
   late OfflineRepository<T> offlineRepository;
-
-  @protected
-  DataAdapter<T> get dataAdapter => localRepository.dataAdapter;
 
   @protected
   String get serviceName => dataAdapter.serviceName;
@@ -42,7 +30,7 @@ class RemoteRepository<T extends DataModel<T>> {
     await localRepository.initialize();
     await offlineRepository.initialize();
     _isInit = true;
-    return this;
+    return this as RemoteRepository<T>;
   }
 
   String url({
@@ -152,10 +140,14 @@ class RemoteRepository<T extends DataModel<T>> {
     bool local = false,
     Map<String, String>? headers,
     Map<String, dynamic>? query,
+    QueryBuilder<T>? queryBuilder,
     OfflineExceptionCallback? onOfflineException,
   }) async {
+    if (queryBuilder != null) {
+      query?.addAll(parseQuery(queryBuilder: queryBuilder));
+    }
     if (local) {
-      return await localRepository.getAll();
+      return await localRepository.getAll(queryBuilder: queryBuilder);
     }
     return await sendRequest(
       url: path ?? url(method: RequestMethod.get),
@@ -448,6 +440,24 @@ class RemoteRepository<T extends DataModel<T>> {
   Future<void> dispose() async {
     await localRepository.dispose();
   }
+
+  Map<String, dynamic> parseQuery({required QueryBuilder<T> queryBuilder});
+
+  Map<String, dynamic> parseOperation(FilterOperation<T> operation);
+
+  Map<String, dynamic> parseEqual(FilterCondition<T> condition);
+
+  Map<String, dynamic> parseNotEqual(FilterCondition<T> condition);
+
+  Map<String, dynamic> parseGreaterThan(FilterCondition<T> condition);
+
+  Map<String, dynamic> parseLessThan(FilterCondition<T> condition);
+
+  Map<String, dynamic> parseInValues(FilterCondition<T> condition);
+
+  Map<String, dynamic> parseOrCondition(List<FilterOperation<T>> operations);
+
+  Map<String, dynamic> parseAndCondition(List<FilterOperation<T>> operations);
 }
 
 typedef OnSuccess<R> = Future<R?> Function(Object? data);

@@ -19,8 +19,8 @@ void setUpFn() async {
           baseDirectory: hiveDir,
           defaultBaseUrl: 'http://example.com',
           dio: dio)
-      .registerAdapter(UserAdapter())
-      .registerAdapter(BookAdapter())
+      .registerRepository(UserRepository())
+      .registerRepository(BookRepository())
       .init();
 }
 

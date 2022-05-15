@@ -1,14 +1,4 @@
-import 'package:dio/dio.dart';
-import 'package:get_it/get_it.dart';
-import 'package:hive/hive.dart';
-import 'package:unruffled/src/models/data/data_adapter.dart';
-import 'package:unruffled/src/models/data/data_model.dart';
-import 'package:unruffled/src/models/offline/offline_operation.dart';
-import 'package:unruffled/src/repositories/internal/type_manager.dart';
-import 'package:unruffled/src/repositories/local/hive_local_storage.dart';
-import 'package:unruffled/src/repositories/remote/remote_repository.dart';
-
-import 'repositories/local/local_repository_impl.dart';
+part of unruffled;
 
 class Unruffled {
   Unruffled({
@@ -17,28 +7,26 @@ class Unruffled {
     Map<String, dynamic>? defaultHeaders,
     List<int>? encryptionKey,
     Dio? dio,
-  }) : dio = (dio
-              ?..options.baseUrl = defaultBaseUrl
-              ..options.headers = defaultHeaders) ??
-            Dio(BaseOptions(
-              baseUrl: defaultBaseUrl,
-              headers: defaultHeaders,
-            )) {
-    GetIt.I.registerSingleton(HiveLocalStorage(encryptionKey: encryptionKey));
+  }) {
     GetIt.I.registerSingleton(TypeManager());
+    GetIt.I.registerSingleton(HiveLocalStorage(encryptionKey: encryptionKey));
+    GetIt.I.registerSingleton((dio
+          ?..options.baseUrl = defaultBaseUrl
+          ..options.headers = defaultHeaders) ??
+        Dio(BaseOptions(
+          baseUrl: defaultBaseUrl,
+          headers: defaultHeaders,
+        )));
   }
-
-  final Dio dio;
 
   final String baseDirectory;
 
   final List<RemoteRepository> _remoteRepositories = [];
 
-  Unruffled registerAdapter<T extends DataModel<T>>(DataAdapter<T> adapter) {
-    _remoteRepositories.add(RemoteRepository<T>(
-      localRepository: LocalRepositoryImpl<T>(dataAdapter: adapter),
-      dio: dio,
-    ));
+  Unruffled registerRepository<T extends DataModel<T>>(
+    RemoteRepository<T> remoteRepository,
+  ) {
+    _remoteRepositories.add(remoteRepository);
     return this;
   }
 
@@ -71,6 +59,7 @@ class Unruffled {
     }
     GetIt.I.unregister<TypeManager>();
     GetIt.I.unregister<HiveLocalStorage>();
+    GetIt.I.unregister<Dio>();
     _remoteRepositories.clear();
   }
 }

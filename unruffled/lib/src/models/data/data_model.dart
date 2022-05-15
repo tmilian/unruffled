@@ -1,4 +1,4 @@
-import 'package:uuid/uuid.dart';
+part of unruffled;
 
 const String tempKey = 'temp@';
 

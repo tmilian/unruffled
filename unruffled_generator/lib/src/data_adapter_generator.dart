@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/nullability_suffix.dart';
+import 'package:analyzer/dart/element/type.dart';
+import 'package:analyzer/dart/element/visitor.dart';
 import 'package:build/build.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:collection/collection.dart';
@@ -12,6 +15,7 @@ class DataAdapterGenerator extends GeneratorForAnnotation<UnruffledData> {
     ConstantReader annotation,
     BuildStep buildStep,
   ) async {
+    final classType = element.name;
     if (element is! ClassElement) {
       throw ('Only classes may be annotated with @UnruffledData. $element');
     }
@@ -26,8 +30,35 @@ class DataAdapterGenerator extends GeneratorForAnnotation<UnruffledData> {
     if (constructor == null) {
       throw ('Class needs an unnamed constructor.');
     }
+    final remoteAdapterTypeChecker = TypeChecker.fromRuntime(RemoteRepository);
+    String? displayName;
+    try {
+      var obj = annotation.read('adapter').objectValue;
+      final mixinType = obj.toTypeValue() as ParameterizedType;
+      final mixinMethods = <MethodElement>[];
 
-    return '''
+      final args = mixinType.typeArguments;
+
+      if (args.length > 1) {
+        throw UnsupportedError(
+            'Adapter `$mixinType` MUST have at most one type argument (T extends DataModel<T>) is supported for $mixinType');
+      }
+
+      if (!remoteAdapterTypeChecker.isAssignableFromType(mixinType)) {
+        throw UnsupportedError(
+            'Adapter `$mixinType` MUST have a constraint `on` RemoteAdapter<$classType>');
+      }
+
+      final instantiatedMixinType = (mixinType.element as ClassElement)
+          .instantiate(
+              typeArguments: [if (args.isNotEmpty) element.thisType],
+              nullabilitySuffix: NullabilitySuffix.none);
+      mixinMethods.addAll(instantiatedMixinType.methods);
+      displayName =
+          instantiatedMixinType.getDisplayString(withNullability: false);
+    } catch (e) {}
+    StringBuffer buffer = StringBuffer();
+    buffer.writeln('''
     class ${element.name}Adapter extends DataAdapter<${element.name}> {
       @override
       Map<String, dynamic> serialize(${element.name} model) => _\$${element.name}ToJson(model);
@@ -35,6 +66,46 @@ class DataAdapterGenerator extends GeneratorForAnnotation<UnruffledData> {
       @override
       ${element.name} deserialize(Map<String, dynamic> map) => _\$${element.name}FromJson(map);
     }
-    ''';
+    
+    ''');
+    if (displayName != null) {
+      buffer.writeln('''
+      class \$${element.name}RemoteRepository = RemoteRepository<${element.name}> ${displayName != null ? 'with $displayName' : ''};
+      ''');
+    } else {
+      buffer.writeln(
+          'final remote${element.name} = RemoteRepository<${element.name}>(${element.name}Adapter());');
+    }
+    buffer.writeln('''
+    class ${element.name}Repository extends ${displayName != null ? '\$BookRemoteRepository' : 'RemoteRepository<${element.name}>'} {
+      ${element.name}Repository() : super(${element.name}Adapter());
+    }
+    ''');
+    final visitor = ModelVisitor();
+    element.visitChildren(visitor);
+    buffer.writeln(
+        'class ${element.name}Field extends UnruffledField<${element.name}> {');
+    for (final field in visitor.fields.keys) {
+      buffer.writeln("${element.name}Field.$field() : super('$field');");
+    }
+    buffer.writeln('}');
+    return buffer.toString();
+  }
+}
+
+class ModelVisitor extends SimpleElementVisitor<void> {
+  late String className;
+  final fields = <String, dynamic>{};
+
+  @override
+  void visitConstructorElement(ConstructorElement element) {
+    final elementReturnType = element.type.returnType.toString();
+    className = elementReturnType.replaceFirst('*', '');
+  }
+
+  @override
+  void visitFieldElement(FieldElement element) {
+    final elementType = element.type.toString();
+    fields[element.name] = elementType.replaceFirst('*', '');
   }
 }

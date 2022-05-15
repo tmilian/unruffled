@@ -8,9 +8,15 @@ part 'user.g.dart';
 class User extends DataModel<User> {
   String name;
   String surname;
+  int age;
 
-  User({String? key, int? id, required this.name, required this.surname})
-      : super(id, key);
+  User({
+    String? key,
+    int? id,
+    required this.name,
+    required this.surname,
+    this.age = 18,
+  }) : super(id, key);
 
   Map<String, dynamic> toJson() => _$UserToJson(this);
 

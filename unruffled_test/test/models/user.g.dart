@@ -11,6 +11,7 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       id: json['id'] as int?,
       name: json['name'] as String,
       surname: json['surname'] as String,
+      age: json['age'] as int? ?? 18,
     );
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
@@ -18,6 +19,7 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'key': instance.key,
       'name': instance.name,
       'surname': instance.surname,
+      'age': instance.age,
     };
 
 // **************************************************************************
@@ -30,4 +32,16 @@ class UserAdapter extends DataAdapter<User> {
 
   @override
   User deserialize(Map<String, dynamic> map) => _$UserFromJson(map);
+}
+
+final remoteUser = RemoteRepository<User>(UserAdapter());
+
+class UserRepository extends RemoteRepository<User> {
+  UserRepository() : super(UserAdapter());
+}
+
+class UserField extends UnruffledField<User> {
+  UserField.name() : super('name');
+  UserField.surname() : super('surname');
+  UserField.age() : super('age');
 }

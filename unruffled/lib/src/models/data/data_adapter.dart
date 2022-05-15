@@ -1,5 +1,4 @@
-import 'package:recase/recase.dart';
-import 'package:unruffled/src/models/data/data_model.dart';
+part of unruffled;
 
 abstract class DataAdapter<T extends DataModel<T>> {
   Map<String, dynamic> serialize(T model);

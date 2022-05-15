@@ -31,3 +31,15 @@ class BookAdapter extends DataAdapter<Book> {
   @override
   Book deserialize(Map<String, dynamic> map) => _$BookFromJson(map);
 }
+
+class $BookRemoteRepository = RemoteRepository<Book>
+    with FeathersJsRemoteRepository<Book>;
+
+class BookRepository extends $BookRemoteRepository {
+  BookRepository() : super(BookAdapter());
+}
+
+class BookField extends UnruffledField<Book> {
+  BookField.title() : super('title');
+  BookField.createdAt() : super('createdAt');
+}

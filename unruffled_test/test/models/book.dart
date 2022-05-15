@@ -3,7 +3,15 @@ import 'package:unruffled/unruffled.dart';
 
 part 'book.g.dart';
 
-@UnruffledData()
+mixin FeathersJsRemoteRepository<T extends DataModel<T>>
+    on RemoteRepository<T> {
+  @override
+  Map<String, dynamic> parseAndCondition(List<FilterOperation<T>> operations) {
+    return super.parseAndCondition(operations);
+  }
+}
+
+@UnruffledData(adapter: FeathersJsRemoteRepository)
 @JsonSerializable()
 class Book extends DataModel<Book> {
   String title;

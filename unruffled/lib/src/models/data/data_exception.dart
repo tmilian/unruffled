@@ -1,3 +1,5 @@
+part of unruffled;
+
 class DataException implements Exception {
   final Object error;
   final StackTrace? stackTrace;
