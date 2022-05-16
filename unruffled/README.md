@@ -46,8 +46,9 @@ Declare models used by your remote service and generate Unruffled adapters.
 class User extends DataModel<User> {
   String name;
   String surname;
+  int age;
 
-  User({String? key, int? id, required this.name, required this.surname})
+  User({String? key, int? id, required this.name, required this.surname, required this.age})
       : super(id, key);
 }
 ```
@@ -70,7 +71,7 @@ var unruffled = Unruffled(
       defaultBaseUrl: 'http://example.com',
       dio: dio,
   )
-  .registerAdapter(UserAdapter());
+  .registerRepository(UserRepository());
   ```
 
 ### 4. Initialize Unruffled
@@ -111,7 +112,67 @@ var user = await repository.get(key: user.key);
 var user = await repository.delete(key: user.key);
 ```
 
-### 4. Manage connectivity isues
+### 4. Query users
+
+QueryBuilder lets you apply filters on your queries.
+
+Filters will be applied automatically on local queries.\
+To enable filters on remote queries, you must implement following method :
+
+**Note :** For a complete working example, check [unruffled_feathersjs](https://github.com/tmilian/unruffled/blob/master/unruffled_feathersjs/lib/src/repositories/unruffled_feathersjs_repository.dart)
+```dart
+mixin CustomRemoteRepository<T extends DataModel<T>> on RemoteRepository<T> {
+  @override
+  Map<String, dynamic> parseLimit(int limit) => {};
+
+  @override
+  Map<String, dynamic> parsePage(int page) => {};
+
+  @override
+  Map<String, dynamic> parseSort(SortCondition<R> sort) => {};
+  
+  @override
+  Map<String, dynamic> parseEqual(FilterCondition<T> condition) => {};
+
+  @override
+  Map<String, dynamic> parseNotEqual(FilterCondition<T> condition) => {};
+
+  @override
+  Map<String, dynamic> parseGreaterThan(FilterCondition<T> condition) => {};
+
+  @override
+  Map<String, dynamic> parseLessThan(FilterCondition<T> condition) => {};
+
+  @override
+  Map<String, dynamic> parseInValues(FilterCondition<T> condition) => {};
+
+  @override
+  Map<String, dynamic> parseOrCondition(List<FilterOperation<T>> operations) => {};
+
+  @override
+  Map<String, dynamic> parseAndCondition(List<FilterOperation<T>> operations) => {};
+}
+```
+
+QueryBuilder usage :
+
+```dart
+List<User> users = await repository.getAll(
+  queryBuilder: QueryBuilder(
+    filterGroup: FilterGroup.or(
+      filters: [
+        FilterCondition.equal(property: UserField.surname(), value: 'Doe'),
+        FilterCondition.greaterThan(property: UserField.age(), value: 18, include: true),
+      ],
+    ),
+    limit: 10,
+    page: 1,
+    sort: SortCondition(property: UserField.age(), sort: SortType.desc),
+  ),
+);
+```
+
+### 5. Manage connectivity isues
 
 If connectivity errors occur, Unruffled stores automatically requests to retry them later, just call the global method :
 
