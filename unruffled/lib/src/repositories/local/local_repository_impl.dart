@@ -107,9 +107,35 @@ class LocalRepositoryImpl<T extends DataModel<T>> extends LocalRepository<T>
   }
 
   @override
+  List<T> parsePagination(int limit, int page, List<T> object) {
+    final start = limit * max(0, (page - 1)).toInt();
+    if (start >= object.length) {
+      return [];
+    }
+    return object.sublist(start, min(limit + start, object.length));
+  }
+
+  @override
+  List<T> parseSort(SortCondition<T> sort, List<T> object) {
+    object.sort((a, b) {
+      final prop1 =
+          getProperty(sort.property.property, dataAdapter.serialize(a));
+      final prop2 =
+          getProperty(sort.property.property, dataAdapter.serialize(b));
+      return sort.sort == SortType.asc
+          ? prop1.compareTo(prop2)
+          : prop2.compareTo(prop1);
+    });
+    return object;
+  }
+
+  @override
   List<T> parseEqual(FilterCondition<T> condition, List<T> object) {
     return object.where((model) {
-      final property = getProperty(condition, dataAdapter.serialize(model));
+      final property = getProperty(
+        condition.property.property,
+        dataAdapter.serialize(model),
+      );
       return property == condition.value;
     }).toList();
   }
@@ -118,7 +144,10 @@ class LocalRepositoryImpl<T extends DataModel<T>> extends LocalRepository<T>
   List<T> parseGreaterThan(FilterCondition<T> condition, List<T> object) {
     return object.where((model) {
       final value = condition.value;
-      final property = getProperty(condition, dataAdapter.serialize(model));
+      final property = getProperty(
+        condition.property.property,
+        dataAdapter.serialize(model),
+      );
       if (property is num && value is num) {
         return condition.include ? property >= value : property > value;
       }
@@ -129,7 +158,10 @@ class LocalRepositoryImpl<T extends DataModel<T>> extends LocalRepository<T>
   @override
   List<T> parseInValues(FilterCondition<T> condition, List<T> object) {
     return object.where((model) {
-      final property = getProperty(condition, dataAdapter.serialize(model));
+      final property = getProperty(
+        condition.property.property,
+        dataAdapter.serialize(model),
+      );
       return condition.values.contains(property);
     }).toList();
   }
@@ -138,7 +170,10 @@ class LocalRepositoryImpl<T extends DataModel<T>> extends LocalRepository<T>
   List<T> parseLessThan(FilterCondition<T> condition, List<T> object) {
     return object.where((model) {
       final value = condition.value;
-      final property = getProperty(condition, dataAdapter.serialize(model));
+      final property = getProperty(
+        condition.property.property,
+        dataAdapter.serialize(model),
+      );
       if (property is num && value is num) {
         return condition.include ? property <= value : property < value;
       }
@@ -149,7 +184,10 @@ class LocalRepositoryImpl<T extends DataModel<T>> extends LocalRepository<T>
   @override
   List<T> parseNotEqual(FilterCondition<T> condition, List<T> object) {
     return object.where((model) {
-      final property = getProperty(condition, dataAdapter.serialize(model));
+      final property = getProperty(
+        condition.property.property,
+        dataAdapter.serialize(model),
+      );
       return property != condition.value;
     }).toList();
   }

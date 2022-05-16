@@ -4,6 +4,7 @@
 library unruffled;
 
 import 'dart:async';
+import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
@@ -17,6 +18,7 @@ import 'package:uuid/uuid.dart';
 export 'src/annotations/unruffled_data.dart';
 export 'src/models/offline/offline_operation.dart';
 
+part 'src/extensions/dynamic.dart';
 part 'src/models/data/data_adapter.dart';
 part 'src/models/data/data_exception.dart';
 part 'src/models/data/data_model.dart';

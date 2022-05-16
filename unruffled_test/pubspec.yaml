@@ -13,7 +13,7 @@ dependencies:
   integration_test:
     sdk: flutter
   json_annotation: ^4.5.0
-  unruffled_flutter: any
+  unruffled: ^1.1.0
 
 dev_dependencies:
   flutter_test:
@@ -26,6 +26,8 @@ dev_dependencies:
   unruffled_generator: any
 
 dependency_overrides:
+  unruffled:
+    path: ../unruffled
   unruffled_generator:
     path: ../unruffled_generator
   test_api: ^0.4.9

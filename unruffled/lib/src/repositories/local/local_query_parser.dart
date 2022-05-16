@@ -12,7 +12,20 @@ abstract class LocalQueryParser<T, R extends DataModel<R>> {
   }) {
     this.orParser = orParser;
     this.andParser = andParser;
-    return parseOperation(queryBuilder.filterGroup, data);
+    final filterGroup = queryBuilder.filterGroup;
+    final sort = queryBuilder.sort;
+    final limit = queryBuilder.limit;
+    final page = queryBuilder.page;
+    if (filterGroup != null) {
+      data = parseOperation(filterGroup, data);
+    }
+    if (sort != null) {
+      data = parseSort(sort, data);
+    }
+    if (limit != null) {
+      data = parsePagination(limit, page ?? 1, data);
+    }
+    return data;
   }
 
   T parseOperation(FilterOperation<R> operation, T object) {
@@ -47,6 +60,10 @@ abstract class LocalQueryParser<T, R extends DataModel<R>> {
     return object;
   }
 
+  T parsePagination(int limit, int page, T object);
+
+  T parseSort(SortCondition<R> sort, T object);
+
   T parseEqual(FilterCondition<R> condition, T object);
 
   T parseNotEqual(FilterCondition<R> condition, T object);
@@ -75,8 +92,8 @@ abstract class LocalQueryParser<T, R extends DataModel<R>> {
     return andParser.call(list);
   }
 
-  dynamic getProperty(FilterCondition<R> condition, Map<String, dynamic> map) {
-    final propNames = condition.property.property.split('.');
+  dynamic getProperty(String property, Map<String, dynamic> map) {
+    final propNames = property.split('.');
     for (var prop in propNames) {
       final result = map[prop];
       if (result is Map) {

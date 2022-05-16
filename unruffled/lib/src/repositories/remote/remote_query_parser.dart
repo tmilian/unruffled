@@ -3,7 +3,24 @@ part of unruffled;
 mixin _RemoteQueryParser<R extends DataModel<R>> on _RemoteRepository<R> {
   @override
   Map<String, dynamic> parseQuery({required QueryBuilder<R> queryBuilder}) {
-    return parseOperation(queryBuilder.filterGroup);
+    final filterGroup = queryBuilder.filterGroup;
+    final sort = queryBuilder.sort;
+    final limit = queryBuilder.limit;
+    final page = queryBuilder.page;
+    Map<String, dynamic> map = {};
+    if (filterGroup != null) {
+      map.addAll(parseOperation(filterGroup));
+    }
+    if (sort != null) {
+      map.addAll(parseSort(sort));
+    }
+    if (limit != null) {
+      map.addAll(parseLimit(limit));
+    }
+    if (page != null) {
+      map.addAll(parsePage(page));
+    }
+    return map;
   }
 
   @override
@@ -39,6 +56,15 @@ mixin _RemoteQueryParser<R extends DataModel<R>> on _RemoteRepository<R> {
     }
     return map;
   }
+
+  @override
+  Map<String, dynamic> parseLimit(int limit) => {};
+
+  @override
+  Map<String, dynamic> parsePage(int page) => {};
+
+  @override
+  Map<String, dynamic> parseSort(SortCondition<R> sort) => {};
 
   @override
   Map<String, dynamic> parseEqual(FilterCondition<R> condition) => {};

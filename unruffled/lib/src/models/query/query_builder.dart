@@ -5,7 +5,7 @@ part of unruffled;
 /// online
 class QueryBuilder<T extends DataModel<T>> {
   /// Filter operations (check [ConditionType])
-  FilterGroup<T> filterGroup;
+  FilterGroup<T>? filterGroup;
 
   /// Sort results according to [SortType]
   SortCondition<T>? sort;
@@ -17,7 +17,7 @@ class QueryBuilder<T extends DataModel<T>> {
   int? limit;
 
   QueryBuilder({
-    required this.filterGroup,
+    this.filterGroup,
     this.sort,
     this.page,
     this.limit,

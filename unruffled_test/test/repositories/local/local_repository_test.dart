@@ -160,5 +160,78 @@ void main() async {
       );
       expect(users?.length, (allUsers?.length ?? 0) - 2);
     });
+
+    test('Limit', () async {
+      var users = await repository.getAll(
+        local: true,
+        queryBuilder: QueryBuilder(limit: 2),
+      );
+      expect(users?.length, 2);
+    });
+
+    test('Sort asc', () async {
+      var users = await repository.getAll(
+        local: true,
+        queryBuilder: QueryBuilder(
+          sort: SortCondition(
+            property: UserField.age(),
+            sort: SortType.asc,
+          ),
+        ),
+      );
+      final ages = users?.map((e) => e.age).toList() ?? [];
+      expect(ages, ages..sort());
+    });
+
+    test('Sort desc', () async {
+      var users = await repository.getAll(
+        local: true,
+        queryBuilder: QueryBuilder(
+          sort: SortCondition(
+            property: UserField.age(),
+            sort: SortType.desc,
+          ),
+        ),
+      );
+      final ages = users?.map((e) => e.age).toList() ?? [];
+      expect(ages, ages..sort((a, b) => b.compareTo(a)));
+    });
+
+    test('Limit & Page & Sort', () async {
+      var users = await repository.getAll(
+        local: true,
+        queryBuilder: QueryBuilder(
+          sort: SortCondition(
+            property: UserField.age(),
+            sort: SortType.desc,
+          ),
+          limit: 2,
+          page: 2,
+        ),
+      );
+      final ages = users?.map((e) => e.age).toList() ?? [];
+      expect(ages, [30, 22]);
+    });
+
+    test('Limit & Page & Sort & Filter', () async {
+      var users = await repository.getAll(
+        local: true,
+        queryBuilder: QueryBuilder(
+          filterGroup: FilterGroup.and(
+            filters: [
+              FilterCondition.greaterThan(property: UserField.age(), value: 23),
+            ],
+          ),
+          sort: SortCondition(
+            property: UserField.age(),
+            sort: SortType.desc,
+          ),
+          limit: 2,
+          page: 2,
+        ),
+      );
+      final ages = users?.map((e) => e.age).toList() ?? [];
+      expect(ages, [30]);
+    });
   });
 }

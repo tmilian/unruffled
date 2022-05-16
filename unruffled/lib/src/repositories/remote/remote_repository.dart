@@ -443,6 +443,12 @@ abstract class _RemoteRepository<T extends DataModel<T>> {
 
   Map<String, dynamic> parseQuery({required QueryBuilder<T> queryBuilder});
 
+  Map<String, dynamic> parseLimit(int limit);
+
+  Map<String, dynamic> parsePage(int page);
+
+  Map<String, dynamic> parseSort(SortCondition<T> sort);
+
   Map<String, dynamic> parseOperation(FilterOperation<T> operation);
 
   Map<String, dynamic> parseEqual(FilterCondition<T> condition);
