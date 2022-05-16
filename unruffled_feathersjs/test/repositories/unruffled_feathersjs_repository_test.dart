@@ -20,6 +20,9 @@ void main() async {
     test('Remote filters builder', () async {
       final map = repository.parseQuery(
         queryBuilder: QueryBuilder(
+          limit: 10,
+          page: 1,
+          sort: SortCondition(property: BookField.pages(), sort: SortType.asc),
           filterGroup: FilterGroup.and(
             filters: [
               FilterCondition.equal(property: BookField.pages(), value: 20),
@@ -59,6 +62,9 @@ void main() async {
         '\$or[0][pages][\$in][2]': 28,
         '\$or[1][createdAt][\$gt]': 1640991600000,
         '\$or[2][pages]': 20,
+        '\$sort[pages]': 1,
+        '\$limit': 10,
+        '\$skip': 1
       });
     });
   });

@@ -62,6 +62,16 @@ mixin FeathersJsRemoteRepository<T extends DataModel<T>>
   }
 
   @override
+  Map<String, dynamic> parseLimit(int limit) => {'\$limit': limit};
+
+  @override
+  Map<String, dynamic> parsePage(int page) => {'\$skip': page};
+
+  @override
+  Map<String, dynamic> parseSort(SortCondition sort) =>
+      {'\$sort[${sort.property.property}]': sort.sort == SortType.asc ? 1 : -1};
+
+  @override
   Map<String, dynamic> parseEqual(FilterCondition<T> condition) =>
       {condition.property.property: condition.value};
 
