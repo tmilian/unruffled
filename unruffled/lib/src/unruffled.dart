@@ -60,6 +60,7 @@ class Unruffled {
     GetIt.I.unregister<TypeManager>();
     GetIt.I.unregister<HiveLocalStorage>();
     GetIt.I.unregister<Dio>();
+    await Hive.close();
     _remoteRepositories.clear();
   }
 }

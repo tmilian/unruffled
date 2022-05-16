@@ -1,6 +1,6 @@
 name: unruffled_generator
 description: Code generator for Unruffled framework.
-version: 1.0.0
+version: 1.1.0
 homepage: https://github.com/tmilian/unruffled
 
 environment:
@@ -9,9 +9,9 @@ environment:
 dependencies:
   analyzer: ^3.0.0
   build: ^2.3.0
+  collection: ^1.15.0
   source_gen: ^1.2.2
-  unruffled:
-    path: ../unruffled
+  unruffled: ^1.1.0
 
 dev_dependencies:
   lints: ^1.0.0
