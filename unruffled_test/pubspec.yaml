@@ -26,8 +26,6 @@ dev_dependencies:
   unruffled_generator: any
 
 dependency_overrides:
-  unruffled_flutter:
-    path: ../unruffled_flutter
   unruffled_generator:
     path: ../unruffled_generator
   test_api: ^0.4.9

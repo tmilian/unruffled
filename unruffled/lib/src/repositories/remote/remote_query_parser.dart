@@ -1,10 +1,12 @@
 part of unruffled;
 
 mixin _RemoteQueryParser<R extends DataModel<R>> on _RemoteRepository<R> {
+  @override
   Map<String, dynamic> parseQuery({required QueryBuilder<R> queryBuilder}) {
     return parseOperation(queryBuilder.filterGroup);
   }
 
+  @override
   Map<String, dynamic> parseOperation(FilterOperation<R> operation) {
     Map<String, dynamic> map = {};
     if (operation is FilterGroup<R>) {
@@ -38,19 +40,26 @@ mixin _RemoteQueryParser<R extends DataModel<R>> on _RemoteRepository<R> {
     return map;
   }
 
+  @override
   Map<String, dynamic> parseEqual(FilterCondition<R> condition) => {};
 
+  @override
   Map<String, dynamic> parseNotEqual(FilterCondition<R> condition) => {};
 
+  @override
   Map<String, dynamic> parseGreaterThan(FilterCondition<R> condition) => {};
 
+  @override
   Map<String, dynamic> parseLessThan(FilterCondition<R> condition) => {};
 
+  @override
   Map<String, dynamic> parseInValues(FilterCondition<R> condition) => {};
 
+  @override
   Map<String, dynamic> parseOrCondition(List<FilterOperation<R>> operations) =>
       {};
 
+  @override
   Map<String, dynamic> parseAndCondition(List<FilterOperation<R>> operations) =>
       {};
 }

@@ -1,0 +1,19 @@
+name: unruffled_feathersjs
+description: A starting point for Dart libraries or applications.
+version: 1.0.0
+# homepage: https://www.example.com
+
+environment:
+  sdk: '>=2.16.2 <3.0.0'
+
+
+dependencies:
+  unruffled: ^1.1.0
+
+dev_dependencies:
+  build_runner: any
+  json_serializable: ^6.2.0
+  unruffled_generator: ^1.1.0
+  http_mock_adapter: ^0.3.2
+  lints: ^1.0.0
+  test: ^1.16.0
