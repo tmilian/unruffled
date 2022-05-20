@@ -37,19 +37,20 @@ abstract class _RemoteRepository<T extends DataModel<T>> {
     required RequestMethod method,
     Map<String, dynamic>? pathParams,
   }) {
+    final baseUrl = dio.options.baseUrl;
     switch (method) {
       case RequestMethod.get:
         return pathParams == null
-            ? '/$serviceName'
-            : '/$serviceName/${pathParams['id']}';
+            ? '$baseUrl/$serviceName'
+            : '$baseUrl/$serviceName/${pathParams['id']}';
       case RequestMethod.post:
-        return '/$serviceName';
+        return '$baseUrl/$serviceName';
       case RequestMethod.patch:
-        return '/$serviceName/${pathParams?['id']}';
+        return '$baseUrl/$serviceName/${pathParams?['id']}';
       case RequestMethod.put:
-        return '/$serviceName/${pathParams?['id']}';
+        return '$baseUrl/$serviceName/${pathParams?['id']}';
       case RequestMethod.delete:
-        return '/$serviceName/${pathParams?['id']}';
+        return '$baseUrl/$serviceName/${pathParams?['id']}';
     }
   }
 
@@ -251,6 +252,7 @@ abstract class _RemoteRepository<T extends DataModel<T>> {
       method: RequestMethod.post,
       headers: headers,
       query: query,
+      body: serialize(model)..addAll(body ?? {}),
       onSuccess: (data) async {
         var deserialized = deserialize(data);
         var newModel = deserialized.model;
@@ -315,6 +317,7 @@ abstract class _RemoteRepository<T extends DataModel<T>> {
       method: RequestMethod.put,
       headers: headers,
       query: query,
+      body: serialize(model)..addAll(body ?? {}),
       onSuccess: (data) async {
         var deserialized = deserialize(data);
         await offlineRepository.delete(offlineOperation);
@@ -358,7 +361,7 @@ abstract class _RemoteRepository<T extends DataModel<T>> {
       path: path,
       headers: headers,
       query: query,
-      body: body,
+      body: serialize(model)..addAll(body ?? {}),
     );
     await localRepository.save(model.key, model);
     var isLocalModel = model.key.toString().startsWith(tempKey);
@@ -411,8 +414,8 @@ abstract class _RemoteRepository<T extends DataModel<T>> {
       );
       return onSuccess(response.data);
     } on DioError catch (e) {
-      if (_isConnectivityError(e.error)) {
-        return await onOfflineException?.call();
+      if (_isConnectivityError(e.error) && onOfflineException != null) {
+        return await onOfflineException();
       } else {
         final dataException = DataException(e,
             stackTrace: e.stackTrace, statusCode: e.response?.statusCode);
