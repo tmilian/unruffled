@@ -23,7 +23,7 @@ void main() async {
       var route = repository.url(method: RequestMethod.post);
       dioAdapter.onPost(route, (server) {
         return server.reply(200, user);
-      });
+      }, data: user.toJson());
       await repository.post(model: user);
     }
   });

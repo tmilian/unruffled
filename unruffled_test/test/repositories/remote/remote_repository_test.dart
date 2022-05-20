@@ -93,7 +93,7 @@ void main() async {
                 name: testUser.name,
                 surname: testUser.surname,
               ));
-        });
+        }, data: testUser.toJson());
         var user = await repository.post(model: testUser);
         print('Remote model ${user.toJson()}');
         expect(user.id, testUserId);
@@ -113,7 +113,7 @@ void main() async {
         var route = repository.url(method: RequestMethod.post);
         dioAdapter.onPost(route, (server) {
           return server.reply(500, 'Internal server error');
-        });
+        }, data: testUser.toJson());
         expect(() async {
           await repository.post(model: testUser);
         }, throwsA(isA<DataException>()));
@@ -138,7 +138,7 @@ void main() async {
               error: 'Connection closed before full header was received',
             ),
           );
-        });
+        }, data: testUser.toJson());
         var user = await repository.post(model: testUser);
         expect(user.key.startsWith('temp@'), isTrue);
       });
@@ -162,7 +162,7 @@ void main() async {
               error: 'Connection closed before full header was received',
             ),
           );
-        });
+        }, data: testUser.toJson());
         await operation.retry(repository);
         var localUser = await repository.get(key: testUser.key, local: true);
         expect(
@@ -186,7 +186,7 @@ void main() async {
               surname: testUser.surname,
             ),
           );
-        });
+        }, data: testUser.toJson());
         await operation.retry(repository);
         expect(repository.offlineOperations.length, 0);
       });
@@ -194,11 +194,16 @@ void main() async {
   });
 
   group('PUT', () {
+    final testUserId = 300;
     final testUser = User(
       name: 'Jane',
       surname: 'Doe',
     );
-    var testUserId = 300;
+    final putUser = User(
+      id: testUserId,
+      name: testUser.name,
+      surname: testUser.surname,
+    );
 
     group('Remote synced model', () {
       group('Request succeed', () {
@@ -209,22 +214,9 @@ void main() async {
             pathParams: {'id': '$testUserId'},
           );
           dioAdapter.onPut(route, (server) {
-            return server.reply(
-              200,
-              User(
-                id: testUserId,
-                name: testUser.name,
-                surname: testUser.surname,
-              ),
-            );
-          });
-          var user = await repository.put(
-            model: User(
-              id: testUserId,
-              name: testUser.name,
-              surname: testUser.surname,
-            ),
-          );
+            return server.reply(200, putUser);
+          }, data: putUser.toJson());
+          var user = await repository.put(model: putUser);
           print('Remote model ${user.toJson()}');
           expect(user.id, testUserId);
         });
@@ -244,17 +236,15 @@ void main() async {
             method: RequestMethod.put,
             pathParams: {'id': '$testUserId'},
           );
-          dioAdapter.onPut(route, (server) {
-            return server.reply(500, 'Internal server error');
-          });
+          dioAdapter.onPut(
+            route,
+            (server) {
+              return server.reply(500, 'Internal server error');
+            },
+            data: putUser.toJson(),
+          );
           expect(() async {
-            await repository.put(
-              model: User(
-                id: testUserId,
-                name: testUser.name,
-                surname: testUser.surname,
-              ),
-            );
+            await repository.put(model: putUser);
           }, throwsA(isA<DataException>()));
         });
 
@@ -281,14 +271,8 @@ void main() async {
                 error: 'Connection closed before full header was received',
               ),
             );
-          });
-          var user = await repository.put(
-            model: User(
-              id: testUserId,
-              name: testUser.name,
-              surname: testUser.surname,
-            ),
-          );
+          }, data: putUser.toJson());
+          var user = await repository.put(model: putUser);
           expect(user.id, testUserId);
         });
 
@@ -319,7 +303,7 @@ void main() async {
                 error: 'Connection closed before full header was received',
               ),
             );
-          });
+          }, data: putUser.toJson());
           await operation.retry(repository);
           var localUser = await repository.get(key: testUserId, local: true);
           expect(
@@ -339,15 +323,8 @@ void main() async {
             pathParams: {'id': '$testUserId'},
           );
           dioAdapter.onPut(route, (server) {
-            return server.reply(
-              200,
-              User(
-                id: testUserId,
-                name: testUser.name,
-                surname: testUser.surname,
-              ),
-            );
-          });
+            return server.reply(200, putUser);
+          }, data: putUser.toJson());
           await operation.retry(repository);
           expect(repository.offlineOperations.length, 0);
         });
