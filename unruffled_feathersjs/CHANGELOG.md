@@ -1,3 +1,7 @@
+## 1.5.0
+
+- Cast repository in FeathersJsRemoteRepository
+
 ## 1.4.0
 
 - Make TokenStorage parameters nullable

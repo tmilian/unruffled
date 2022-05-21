@@ -9,7 +9,7 @@ unruffled_feathersjs is feathersjs client for Flutter that manages offline by de
 ```yaml
 dependencies:
   json_annotation: ^4.5.0
-  unruffled_feathersjs: ^1.2.0
+  unruffled_feathersjs: ^1.5.0
 
 dev_dependencies:
   build_runner: any
@@ -24,7 +24,7 @@ dev_dependencies:
 Declare models used by your remote service and generate Unruffled adapters.
 
 ```dart
-@UnruffledData()
+@UnruffledFeathersJsData()
 @JsonSerializable()
 class User extends DataModel<User> {
   @override
