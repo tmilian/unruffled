@@ -2,8 +2,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http_mock_adapter/http_mock_adapter.dart';
-import 'package:unruffled_feathersjs/src/storage/token_storage.dart';
-import 'package:unruffled_feathersjs/src/unruffled_feathersjs.dart';
+import 'package:unruffled_feathersjs/unruffled_feathersjs.dart';
 
 import '../models/book.dart';
 

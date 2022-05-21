@@ -1,3 +1,5 @@
+part of unruffled_feathersjs;
+
 abstract class TokenStorage {
   Future<void> setAccessToken({required String token});
 

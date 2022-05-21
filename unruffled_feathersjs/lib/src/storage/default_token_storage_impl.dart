@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:unruffled_feathersjs/src/storage/token_storage.dart';
+import 'package:unruffled_feathersjs/unruffled_feathersjs.dart';
 
 class DefaultTokenStorageImpl implements TokenStorage {
   const DefaultTokenStorageImpl();

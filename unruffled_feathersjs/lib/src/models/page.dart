@@ -1,4 +1,4 @@
-import 'package:unruffled/unruffled.dart';
+part of unruffled_feathersjs;
 
 class Paginate<T extends DataModel<T>> {
   int total;
