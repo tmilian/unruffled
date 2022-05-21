@@ -1,6 +1,6 @@
 name: unruffled_feathersjs
 description: A FeathersJS client for Flutter based on unruffled
-version: 1.3.0
+version: 1.4.0
 homepage: https://github.com/tmilian/unruffled/tree/master/unruffled_feathersjs
 
 environment:

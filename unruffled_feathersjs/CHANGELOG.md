@@ -1,3 +1,7 @@
+## 1.4.0
+
+- Make TokenStorage parameters nullable
+
 ## 1.3.0
 
 - Migrate to Dart 2.17 
