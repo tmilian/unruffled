@@ -2,14 +2,15 @@ part of unruffled;
 
 const String tempKey = 'temp@';
 
-class DataModel<T extends DataModel<T>> {
-  DataModel(this.id, String? key)
-      : key = key ?? id?.toString() ?? '$tempKey${Uuid().v1()}';
+abstract class DataModel<T extends DataModel<T>> {
+  DataModel({String? key}) {
+    this.key = key ?? id?.toString() ?? '$tempKey${Uuid().v1()}';
+  }
 
   /// Remote object id
   /// Null when model has not been synced on your server
   ///
-  Object? id;
+  Object? get id;
 
   /// Auto-generated key to identify a model locally
   ///
@@ -19,5 +20,5 @@ class DataModel<T extends DataModel<T>> {
   /// When model is synced on your server
   /// key = id.toString()
   ///
-  String key;
+  late String key;
 }

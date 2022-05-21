@@ -15,8 +15,8 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
     );
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
-      'id': instance.id,
       'key': instance.key,
+      'id': instance.id,
       'name': instance.name,
       'surname': instance.surname,
       'age': instance.age,
@@ -41,6 +41,7 @@ class UserRepository extends RemoteRepository<User> {
 }
 
 class UserField extends UnruffledField<User> {
+  UserField.id() : super('id');
   UserField.name() : super('name');
   UserField.surname() : super('surname');
   UserField.age() : super('age');

@@ -14,9 +14,10 @@ mixin FeathersJsRemoteRepository<T extends DataModel<T>>
 @UnruffledData(adapter: FeathersJsRemoteRepository)
 @JsonSerializable()
 class Book extends DataModel<Book> {
+  @override
+  int? id;
   String title;
   DateTime createdAt;
 
-  Book({String? key, int? id, required this.title, required this.createdAt})
-      : super(id, key);
+  Book({super.key, this.id, required this.title, required this.createdAt});
 }

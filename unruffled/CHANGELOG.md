@@ -1,3 +1,8 @@
+## 1.4.0
+
+- Allows overriding id type from DataModel
+- Migrate to Dart 2.17
+
 ## 1.3.0
 
 - Fix url generation method

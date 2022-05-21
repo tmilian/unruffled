@@ -27,12 +27,17 @@ Declare models used by your remote service and generate Unruffled adapters.
 @UnruffledData()
 @JsonSerializable()
 class User extends DataModel<User> {
+  @override
+  @JsonKey(name: '_id') // e.g MongoDB item has '_id' as unique identifier
+  int? id;
+  
   String name;
+  
   String surname;
+  
   int age;
 
-  User({String? key, int? id, required this.name, required this.surname, required this.age})
-      : super(id, key);
+  User({super.key, this.id, required this.name, required this.surname, required this.age});
 }
 ```
 
