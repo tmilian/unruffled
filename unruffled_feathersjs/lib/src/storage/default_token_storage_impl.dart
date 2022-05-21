@@ -13,7 +13,7 @@ class DefaultTokenStorageImpl implements TokenStorage {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   @override
-  Future<void> setAccessToken({required String token}) async {
+  Future<void> setAccessToken({String? token}) async {
     await _storage.write(key: accessTokenKey, value: token);
   }
 
@@ -23,7 +23,7 @@ class DefaultTokenStorageImpl implements TokenStorage {
   }
 
   @override
-  Future<void> setRefreshToken({required String token}) async {
+  Future<void> setRefreshToken({String? token}) async {
     await _storage.write(key: refreshTokenKey, value: token);
   }
 
@@ -39,7 +39,7 @@ class DefaultTokenStorageImpl implements TokenStorage {
   }
 
   @override
-  Future<void> setUser({required Map<String, dynamic> user}) async {
+  Future<void> setUser({Map<String, dynamic>? user}) async {
     await _storage.write(key: userKey, value: jsonEncode(user));
   }
 }

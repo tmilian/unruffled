@@ -7,15 +7,17 @@ part 'book.g.dart';
 @UnruffledData(adapter: FeathersJsRemoteRepository)
 @JsonSerializable()
 class Book extends DataModel<Book> {
+  @override
+  int? id;
   String title;
   int pages;
   DateTime createdAt;
 
   Book({
-    String? key,
-    int? id,
+    super.key,
+    this.id,
     required this.title,
     required this.pages,
     required this.createdAt,
-  }) : super(id, key);
+  });
 }
