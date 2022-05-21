@@ -15,8 +15,8 @@ Book _$BookFromJson(Map<String, dynamic> json) => Book(
     );
 
 Map<String, dynamic> _$BookToJson(Book instance) => <String, dynamic>{
-      'id': instance.id,
       'key': instance.key,
+      'id': instance.id,
       'title': instance.title,
       'pages': instance.pages,
       'createdAt': instance.createdAt.toIso8601String(),
@@ -42,6 +42,7 @@ class BookRepository extends $BookRemoteRepository {
 }
 
 class BookField extends UnruffledField<Book> {
+  BookField.id() : super('id');
   BookField.title() : super('title');
   BookField.pages() : super('pages');
   BookField.createdAt() : super('createdAt');

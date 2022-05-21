@@ -5,8 +5,7 @@ import 'package:unruffled_feathersjs/unruffled_feathersjs.dart';
 import '../_support/setup.dart';
 import '../models/book.dart';
 
-FeathersJsRemoteRepository<Book> get repository =>
-    unruffled.repository<Book>() as FeathersJsRemoteRepository<Book>;
+FeathersJsRemoteRepository<Book> get repository => unruffled.repository<Book>();
 
 void main() async {
   setUp(setUpFn);

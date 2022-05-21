@@ -84,4 +84,9 @@ class UnruffledFeathersJs extends Unruffled {
     await tokenStorage.setUser(user: response.data?['user']);
     return response.data;
   }
+
+  @override
+  FeathersJsRemoteRepository<T> repository<T extends DataModel<T>>() {
+    return super.repository<T>() as FeathersJsRemoteRepository<T>;
+  }
 }

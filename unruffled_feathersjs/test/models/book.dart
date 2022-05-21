@@ -4,7 +4,7 @@ import 'package:unruffled_feathersjs/unruffled_feathersjs.dart';
 
 part 'book.g.dart';
 
-@UnruffledData(adapter: FeathersJsRemoteRepository)
+@UnruffledFeathersJsData()
 @JsonSerializable()
 class Book extends DataModel<Book> {
   @override
