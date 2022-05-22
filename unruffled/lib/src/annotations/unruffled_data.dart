@@ -4,5 +4,6 @@ import 'package:meta/meta_meta.dart';
 @Target({TargetKind.classType})
 class UnruffledData {
   final Type? adapter;
-  const UnruffledData({this.adapter});
+  final String? serviceName;
+  const UnruffledData({this.adapter, this.serviceName});
 }
