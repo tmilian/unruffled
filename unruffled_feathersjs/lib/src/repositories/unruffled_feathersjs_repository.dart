@@ -9,6 +9,10 @@ mixin FeathersJsRemoteRepository<T extends DataModel<T>>
     Map<String, dynamic>? query,
     QueryBuilder<T>? queryBuilder,
     OfflineExceptionCallback? onOfflineException,
+    String listKey = 'data',
+    String totalKey = 'total',
+    String limitKey = 'limit',
+    String pageKey = 'skip',
   }) async {
     if (queryBuilder != null) {
       query?.addAll(parseQuery(queryBuilder: queryBuilder));
@@ -30,28 +34,24 @@ mixin FeathersJsRemoteRepository<T extends DataModel<T>>
       headers: headers,
       query: query,
       onSuccess: (data) async {
-        var deserialized = deserialize(data);
-        for (var model in deserialized.models) {
-          await localRepository.save(model.key, model);
-        }
-        var models = deserialized.models;
         if (data is Map &&
-            data.containsKey('total') &&
-            data.containsKey('limit') &&
-            data.containsKey('skip')) {
+            data.containsKey(listKey) &&
+            data.containsKey(totalKey) &&
+            data.containsKey(limitKey) &&
+            data.containsKey(pageKey)) {
+          var deserialized = deserialize(data[listKey]);
+          for (var model in deserialized.models) {
+            await localRepository.save(model.key, model);
+          }
+          var models = deserialized.models;
           return Paginate(
-            total: data['total'],
-            limit: data['limit'],
-            skip: data['skip'],
+            total: data[totalKey],
+            limit: data[limitKey],
+            skip: data[pageKey],
             data: models,
           );
         }
-        return Paginate(
-          total: models.length,
-          limit: models.length,
-          skip: 0,
-          data: models,
-        );
+        throw ('Response bad format');
       },
       onError: (e) => throw e,
       onOfflineException: () async {

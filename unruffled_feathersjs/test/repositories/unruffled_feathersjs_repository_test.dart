@@ -10,13 +10,41 @@ FeathersJsRemoteRepository<Book> get repository => unruffled.repository<Book>();
 void main() async {
   setUp(setUpFn);
   tearDown(tearDownFn);
+  tearDownAll(tearDownAllFn);
 
   test('Repository Initialized', () {
     expect(repository.isInitialized, isTrue);
   });
 
-  group('Query builders', () {
-    test('Remote filters builder', () async {
+  group('Remote repository', () {
+    test('Get all paginated', () async {
+      final route = repository.url(method: RequestMethod.get);
+      dioAdapter.onGet(route, (server) {
+        return server.reply(200, {
+          "total": 1,
+          "limit": 10,
+          "skip": 0,
+          "data": [
+            {
+              'id': 1,
+              'title': 'berv',
+              'pages': 300,
+              'createdAt': '10432044',
+            },
+            {
+              'id': 2,
+              'title': 'dgsgsg',
+              'pages': 450,
+              'createdAt': '10432044',
+            }
+          ],
+        });
+      });
+      var results = await repository.getAllPaginated();
+      expect(results?.data.length, 2);
+    });
+
+    test('Query filters builder', () async {
       final map = repository.parseQuery(
         queryBuilder: QueryBuilder(
           limit: 10,

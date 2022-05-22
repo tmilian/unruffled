@@ -6,6 +6,7 @@ import '_support/setup.dart';
 void main() async {
   setUp(setUpFn);
   tearDown(tearDownFn);
+  tearDownAll(tearDownAllFn);
 
   WidgetsFlutterBinding.ensureInitialized();
 

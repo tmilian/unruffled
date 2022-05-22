@@ -8,10 +8,9 @@ import '../models/book.dart';
 
 late DioAdapter dioAdapter;
 late UnruffledFeathersJs unruffled;
+final hiveDir = '${Directory.current.path}/test/hive';
 
 void setUpFn() async {
-  final hiveDir = '${Directory.current.path}/test/hive';
-
   /// Create Unruffled instance
   unruffled = UnruffledFeathersJs(
     baseDirectory: hiveDir,
@@ -26,6 +25,10 @@ void setUpFn() async {
 
 void tearDownFn() async {
   await unruffled.dispose();
+}
+
+void tearDownAllFn() async {
+  await Directory(hiveDir).delete(recursive: true);
 }
 
 class MockTokenStorage implements TokenStorage {
