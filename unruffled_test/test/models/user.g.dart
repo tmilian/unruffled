@@ -34,8 +34,6 @@ class UserAdapter extends DataAdapter<User> {
   User deserialize(Map<String, dynamic> map) => _$UserFromJson(map);
 }
 
-final remoteUser = RemoteRepository<User>(UserAdapter());
-
 class UserRepository extends RemoteRepository<User> {
   UserRepository() : super(UserAdapter());
 }

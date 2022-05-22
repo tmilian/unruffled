@@ -70,14 +70,11 @@ class DataAdapterGenerator extends GeneratorForAnnotation<UnruffledData> {
     ''');
     if (displayName != null) {
       buffer.writeln('''
-      class \$${element.name}RemoteRepository = RemoteRepository<${element.name}> ${displayName != null ? 'with $displayName' : ''};
+      class \$${element.name}RemoteRepository = RemoteRepository<${element.name}> with $displayName;
       ''');
-    } else {
-      buffer.writeln(
-          'final remote${element.name} = RemoteRepository<${element.name}>(${element.name}Adapter());');
     }
     buffer.writeln('''
-    class ${element.name}Repository extends ${displayName != null ? '\$BookRemoteRepository' : 'RemoteRepository<${element.name}>'} {
+    class ${element.name}Repository extends ${displayName != null ? '\$${element.name}RemoteRepository' : 'RemoteRepository<${element.name}>'} {
       ${element.name}Repository() : super(${element.name}Adapter());
     }
     ''');
