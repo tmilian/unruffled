@@ -1,3 +1,7 @@
+## 1.6.0
+
+- Remove Map<String, dynamic> cast on dio fetch
+
 ## 1.5.0
 
 - Customize service name in UnruffledData annotation
