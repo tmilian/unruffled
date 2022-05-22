@@ -1,3 +1,7 @@
+## 1.5.0
+
+- Customize service name in UnruffledData annotation
+
 ## 1.4.0
 
 - Allows overriding id type from DataModel
