@@ -11,9 +11,29 @@ RemoteRepository<User> get repository => unruffled.repository<User>();
 void main() async {
   setUp(setUpFn);
   tearDown(tearDownFn);
+  tearDownAll(tearDownAllFn);
 
   test('Repository Initialized', () {
     expect(repository.isInitialized, isTrue);
+  });
+
+  group('GET ALL', () {
+    test('Remote', () async {
+      final route = repository.url(method: RequestMethod.get);
+      dioAdapter.onGet(route, (server) {
+        return server.reply(200, [
+          User(id: 1, name: 'Joe', surname: 'Doe').toJson(),
+          User(id: 2, name: 'Jane', surname: 'Doe').toJson(),
+        ]);
+      });
+      var results = await repository.getAll();
+      expect(results?.length, 2);
+    });
+
+    test('Local', () async {
+      var results = await repository.getAll(local: true);
+      expect(results?.length, 2);
+    });
   });
 
   group('GET', () {

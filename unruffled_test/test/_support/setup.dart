@@ -8,9 +8,9 @@ import '../models/user.dart';
 
 late DioAdapter dioAdapter;
 late Unruffled unruffled;
+final hiveDir = '${Directory.current.path}/test/hive';
 
 void setUpFn() async {
-  final hiveDir = '${Directory.current.path}/test/hive';
   Dio dio = Dio();
   dioAdapter = DioAdapter(dio: dio);
 
@@ -26,4 +26,8 @@ void setUpFn() async {
 
 void tearDownFn() async {
   await unruffled.dispose();
+}
+
+void tearDownAllFn() async {
+  await Directory(hiveDir).delete(recursive: true);
 }

@@ -9,6 +9,7 @@ RemoteRepository<User> get repository => unruffled.repository<User>();
 void main() async {
   setUp(setUpFn);
   tearDown(tearDownFn);
+  tearDownAll(tearDownAllFn);
 
   final users = [
     User(id: 1, name: 'John', surname: 'Doe', age: 20),
