@@ -403,7 +403,7 @@ abstract class _RemoteRepository<T extends DataModel<T>> {
     OnOfflineException<R>? onOfflineException,
   }) async {
     try {
-      final response = await dio.fetch<Map<String, dynamic>>(
+      final response = await dio.fetch(
         Options(
           method: method.name,
           headers: headers,
