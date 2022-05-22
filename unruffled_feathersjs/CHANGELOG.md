@@ -1,3 +1,7 @@
+## 1.6.0
+
+- Support service name customization
+
 ## 1.5.0
 
 - Cast repository in FeathersJsRemoteRepository
