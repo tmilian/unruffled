@@ -1,3 +1,7 @@
+## 1.5.0
+
+- Support service name customization
+
 ## 1.4.0
 
 - Fix 'Book' generator error
