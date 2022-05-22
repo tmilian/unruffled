@@ -32,6 +32,9 @@ class UserAdapter extends DataAdapter<User> {
 
   @override
   User deserialize(Map<String, dynamic> map) => _$UserFromJson(map);
+
+  @override
+  String get serviceName => 'service/users';
 }
 
 class UserRepository extends RemoteRepository<User> {

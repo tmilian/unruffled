@@ -3,7 +3,7 @@ import 'package:unruffled/unruffled.dart';
 
 part 'user.g.dart';
 
-@UnruffledData()
+@UnruffledData(serviceName: 'service/users')
 @JsonSerializable()
 class User extends DataModel<User> {
   @override

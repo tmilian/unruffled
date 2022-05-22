@@ -57,6 +57,7 @@ class DataAdapterGenerator extends GeneratorForAnnotation<UnruffledData> {
       displayName =
           instantiatedMixinType.getDisplayString(withNullability: false);
     } catch (e) {}
+    final serviceName = annotation.peek('serviceName')?.stringValue;
     StringBuffer buffer = StringBuffer();
     buffer.writeln('''
     class ${element.name}Adapter extends DataAdapter<${element.name}> {
@@ -65,9 +66,14 @@ class DataAdapterGenerator extends GeneratorForAnnotation<UnruffledData> {
 
       @override
       ${element.name} deserialize(Map<String, dynamic> map) => _\$${element.name}FromJson(map);
-    }
-    
     ''');
+    if (serviceName != null) {
+      buffer.writeln('''
+      @override
+      String get serviceName => '$serviceName';
+      ''');
+    }
+    buffer.writeln('}');
     if (displayName != null) {
       buffer.writeln('''
       class \$${element.name}RemoteRepository = RemoteRepository<${element.name}> with $displayName;
