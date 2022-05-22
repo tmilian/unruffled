@@ -1,3 +1,8 @@
+## 1.7.0
+
+- Unruffled 1.6.0
+- Improve getAllPaginated method 
+
 ## 1.6.0
 
 - Support service name customization
