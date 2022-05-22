@@ -32,6 +32,9 @@ class BookAdapter extends DataAdapter<Book> {
 
   @override
   Book deserialize(Map<String, dynamic> map) => _$BookFromJson(map);
+
+  @override
+  String get serviceName => 'service/books';
 }
 
 class $BookRemoteRepository = RemoteRepository<Book>
