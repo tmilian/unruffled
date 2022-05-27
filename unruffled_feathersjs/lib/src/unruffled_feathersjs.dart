@@ -39,7 +39,7 @@ class UnruffledFeathersJs extends Unruffled {
               print(e);
             }
             String? accessToken = await tokenStorage.getAccessToken();
-            final requestOptions = error.response!.requestOptions;
+            final requestOptions = error.requestOptions;
             requestOptions.headers['Authorization'] = 'Bearer $accessToken';
             final response = await dio.fetch(requestOptions);
             return handler.resolve(response);

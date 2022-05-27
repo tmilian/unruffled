@@ -20,6 +20,7 @@ void setUpFn() async {
   await unruffled.registerRepository(BookRepository()).init();
 
   Dio dio = GetIt.I.get();
+  dio.interceptors.add(LogInterceptor());
   dioAdapter = DioAdapter(dio: dio);
 }
 
