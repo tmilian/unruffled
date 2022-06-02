@@ -1,3 +1,7 @@
+## 1.7.0
+
+- Introduce @Id() annotation to define a unique id in DataModel
+
 ## 1.6.0
 
 - Remove Map<String, dynamic> cast on dio fetch
