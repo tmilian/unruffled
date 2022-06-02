@@ -1,3 +1,8 @@
+## 1.6.0
+
+- Support @Id annotation on DataModel
+- Implement unruffled 1.7.0
+
 ## 1.5.0
 
 - Support service name customization
