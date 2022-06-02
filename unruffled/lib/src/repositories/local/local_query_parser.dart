@@ -1,6 +1,6 @@
 part of unruffled;
 
-abstract class LocalQueryParser<T, R extends DataModel<R>> {
+abstract class LocalQueryParser<T, R extends DataModel> {
   late T Function(List<T> data) orParser;
   late T Function(List<T> data) andParser;
 

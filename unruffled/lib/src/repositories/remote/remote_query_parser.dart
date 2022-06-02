@@ -1,6 +1,6 @@
 part of unruffled;
 
-mixin _RemoteQueryParser<R extends DataModel<R>> on _RemoteRepository<R> {
+mixin _RemoteQueryParser<R extends DataModel> on _RemoteRepository<R> {
   @override
   Map<String, dynamic> parseQuery({required QueryBuilder<R> queryBuilder}) {
     final filterGroup = queryBuilder.filterGroup;

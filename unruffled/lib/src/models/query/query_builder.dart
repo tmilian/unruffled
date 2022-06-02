@@ -3,7 +3,7 @@ part of unruffled;
 /// Used to build GET query filters
 /// It allows you to retrieve data according to applied filters offline or
 /// online
-class QueryBuilder<T extends DataModel<T>> {
+class QueryBuilder<T extends DataModel> {
   /// Filter operations (check [ConditionType])
   FilterGroup<T>? filterGroup;
 
@@ -24,9 +24,9 @@ class QueryBuilder<T extends DataModel<T>> {
   });
 }
 
-abstract class FilterOperation<T extends DataModel<T>> {}
+abstract class FilterOperation<T extends DataModel> {}
 
-class FilterGroup<T extends DataModel<T>> extends FilterOperation<T> {
+class FilterGroup<T extends DataModel> extends FilterOperation<T> {
   /// The filter(s) to be grouped.
   final List<FilterOperation<T>> filters;
 
@@ -40,7 +40,7 @@ class FilterGroup<T extends DataModel<T>> extends FilterOperation<T> {
   FilterGroup.or({required this.filters}) : type = FilterGroupType.or;
 }
 
-class FilterCondition<T extends DataModel<T>> extends FilterOperation<T> {
+class FilterCondition<T extends DataModel> extends FilterOperation<T> {
   /// Type of the filter condition.
   final ConditionType type;
 
@@ -101,7 +101,7 @@ class FilterCondition<T extends DataModel<T>> extends FilterOperation<T> {
 }
 
 /// Property used to sort query results.
-class SortCondition<T extends DataModel<T>> {
+class SortCondition<T extends DataModel> {
   /// Unruffled field used for sorting.
   final UnruffledField<T> property;
 

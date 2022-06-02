@@ -7,7 +7,7 @@ part of 'user.dart';
 // **************************************************************************
 
 User _$UserFromJson(Map<String, dynamic> json) => User(
-      key: json['key'] as String?,
+      unruffledKey: json['unruffledKey'] as String?,
       id: json['id'] as int?,
       name: json['name'] as String,
       surname: json['surname'] as String,
@@ -15,7 +15,7 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
     );
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
-      'key': instance.key,
+      'unruffledKey': instance.unruffledKey,
       'id': instance.id,
       'name': instance.name,
       'surname': instance.surname,
@@ -34,6 +34,9 @@ class UserAdapter extends DataAdapter<User> {
   User deserialize(Map<String, dynamic> map) => _$UserFromJson(map);
 
   @override
+  String? key(User? model) => model?.id?.toString() ?? model?.unruffledKey;
+
+  @override
   String get serviceName => 'service/users';
 }
 
@@ -46,4 +49,8 @@ class UserField extends UnruffledField<User> {
   UserField.name() : super('name');
   UserField.surname() : super('surname');
   UserField.age() : super('age');
+}
+
+extension UserUnruffledExt on User {
+  String get key => id?.toString() ?? unruffledKey;
 }

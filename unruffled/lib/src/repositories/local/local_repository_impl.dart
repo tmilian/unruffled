@@ -1,6 +1,6 @@
 part of unruffled;
 
-class LocalRepositoryImpl<T extends DataModel<T>> extends LocalRepository<T>
+class LocalRepositoryImpl<T extends DataModel> extends LocalRepository<T>
     with TypeAdapter<T>, LocalQueryParser<List<T>, T> {
   LocalRepositoryImpl({
     required DataAdapter<T> dataAdapter,
@@ -50,14 +50,6 @@ class LocalRepositoryImpl<T extends DataModel<T>> extends LocalRepository<T>
   @override
   Future<T?> get(String? key) async {
     return box?.get(key);
-  }
-
-  @override
-  Future<T?> getFromId(Object? id) async {
-    var models = await getAll();
-    return models.firstWhereOrNull(
-      (model) => model.id?.toString() == id?.toString(),
-    );
   }
 
   @override

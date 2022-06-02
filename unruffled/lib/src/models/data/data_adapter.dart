@@ -1,9 +1,11 @@
 part of unruffled;
 
-abstract class DataAdapter<T extends DataModel<T>> {
+abstract class DataAdapter<T extends DataModel> {
   Map<String, dynamic> serialize(T model);
 
   T deserialize(Map<String, dynamic> map);
+
+  String? key(T? model);
 
   /// Generate a typeName from Data Model type.
   /// It is used internally to generate a Hive typeId

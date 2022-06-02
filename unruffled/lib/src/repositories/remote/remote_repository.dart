@@ -1,9 +1,9 @@
 part of unruffled;
 
-class RemoteRepository<T extends DataModel<T>> = _RemoteRepository<T>
+class RemoteRepository<T extends DataModel> = _RemoteRepository<T>
     with _RemoteQueryParser<T>;
 
-abstract class _RemoteRepository<T extends DataModel<T>> {
+abstract class _RemoteRepository<T extends DataModel> {
   _RemoteRepository(this.dataAdapter) {
     localRepository = LocalRepositoryImpl<T>(dataAdapter: dataAdapter);
     offlineRepository = OfflineRepository<T>(dataAdapter: dataAdapter);
@@ -66,9 +66,7 @@ abstract class _RemoteRepository<T extends DataModel<T>> {
     if (data is Iterable) {
       for (final obj in data) {
         final model = dataAdapter.deserialize(obj);
-        if (model.id != null) {
-          result.models.add(model);
-        }
+        result.models.add(model);
       }
     }
     return result;
@@ -101,22 +99,24 @@ abstract class _RemoteRepository<T extends DataModel<T>> {
     OfflineExceptionCallback? onOfflineException,
   }) async {
     var model = await localRepository.delete(key);
+    var isLocalModel = key.toString().startsWith(tempKey);
+    if (isLocalModel) {
+      return model;
+    }
     final offlineOperation = OfflineOperation<T>(
       type: OfflineOperationType.delete,
-      modelKey: model?.key ?? '',
+      modelKey: dataAdapter.key(model) ?? '',
       path: path,
       headers: headers,
       query: query,
       body: body,
     );
-    var isLocalModel = key.toString().startsWith(tempKey);
-    if (isLocalModel) {
-      await offlineRepository.save(offlineOperation);
-      return model;
-    }
+    await offlineRepository.save(offlineOperation);
     return await sendRequest(
       url: path ??
-          url(method: RequestMethod.delete, pathParams: {'id': model?.id}),
+          url(
+              method: RequestMethod.delete,
+              pathParams: {'id': dataAdapter.key(model)}),
       method: RequestMethod.delete,
       headers: headers,
       query: query,
@@ -158,7 +158,9 @@ abstract class _RemoteRepository<T extends DataModel<T>> {
       onSuccess: (data) async {
         var deserialized = deserialize(data);
         for (var model in deserialized.models) {
-          await localRepository.save(model.key, model);
+          final key = dataAdapter.key(model);
+          if (key == null) continue;
+          await localRepository.save(key, model);
         }
         return deserialized.models;
       },
@@ -183,9 +185,8 @@ abstract class _RemoteRepository<T extends DataModel<T>> {
     OfflineExceptionCallback? onOfflineException,
   }) async {
     var isLocalModel = key.toString().startsWith(tempKey);
-    T? model = isLocalModel
-        ? await localRepository.get(key.toString())
-        : await localRepository.getFromId(key);
+    T? model = await localRepository.get(key.toString());
+    print(key);
     if (local || isLocalModel) {
       if (model == null) {
         await _onError(DataException('No ${T.toString()} model with key $key'));
@@ -194,21 +195,25 @@ abstract class _RemoteRepository<T extends DataModel<T>> {
     }
     return await sendRequest(
       url: path ??
-          url(method: RequestMethod.get, pathParams: {'id': model?.id ?? key}),
+          url(
+              method: RequestMethod.get,
+              pathParams: {'id': dataAdapter.key(model) ?? key}),
       method: RequestMethod.get,
       headers: headers,
       query: query,
       onSuccess: (data) async {
-        var deserialized = deserialize(data);
-        var model = deserialized.model;
-        if (model != null) {
-          await localRepository.save(model.key, model);
+        final deserialized = deserialize(data);
+        final model = deserialized.model;
+        final key = dataAdapter.key(model);
+        if (model != null && key != null) {
+          await localRepository.save(key, model);
         }
         return model;
       },
       onError: (e) async {
-        if (model != null) {
-          await localRepository.delete(model.key);
+        final key = dataAdapter.key(model);
+        if (key != null) {
+          await localRepository.delete(key);
         }
         return _onError(e);
       },
@@ -240,13 +245,14 @@ abstract class _RemoteRepository<T extends DataModel<T>> {
   }) async {
     final offlineOperation = OfflineOperation<T>(
       type: OfflineOperationType.post,
-      modelKey: model.key,
+      modelKey: dataAdapter.key(model) ?? '',
       path: path,
       headers: headers,
       query: query,
       body: body,
     );
-    await localRepository.save(model.key, model);
+    print('Key added ${dataAdapter.key(model) ?? ''}');
+    await localRepository.save(dataAdapter.key(model) ?? '', model);
     var result = await sendRequest<T>(
       url: path ?? url(method: RequestMethod.post),
       method: RequestMethod.post,
@@ -257,8 +263,8 @@ abstract class _RemoteRepository<T extends DataModel<T>> {
         var deserialized = deserialize(data);
         var newModel = deserialized.model;
         if (newModel != null) {
-          await localRepository.delete(model.key);
-          await localRepository.save(newModel.key, newModel);
+          await localRepository.delete(dataAdapter.key(model) ?? '');
+          await localRepository.save(dataAdapter.key(newModel) ?? '', newModel);
         }
         await offlineRepository.delete(offlineOperation);
         return newModel;
@@ -297,14 +303,14 @@ abstract class _RemoteRepository<T extends DataModel<T>> {
   }) async {
     final offlineOperation = OfflineOperation<T>(
       type: OfflineOperationType.put,
-      modelKey: model.key,
+      modelKey: dataAdapter.key(model) ?? '',
       path: path,
       headers: headers,
       query: query,
       body: body,
     );
-    await localRepository.save(model.key, model);
-    var isLocalModel = model.key.toString().startsWith(tempKey);
+    await localRepository.save(dataAdapter.key(model) ?? '', model);
+    var isLocalModel = dataAdapter.key(model).toString().startsWith(tempKey);
     if (isLocalModel) {
       await offlineRepository.save(offlineOperation);
       return model;
@@ -313,7 +319,7 @@ abstract class _RemoteRepository<T extends DataModel<T>> {
       url: path ??
           url(
               method: RequestMethod.put,
-              pathParams: {'id': model.id.toString()}),
+              pathParams: {'id': dataAdapter.key(model) ?? ''}),
       method: RequestMethod.put,
       headers: headers,
       query: query,
@@ -357,14 +363,14 @@ abstract class _RemoteRepository<T extends DataModel<T>> {
   }) async {
     final offlineOperation = OfflineOperation<T>(
       type: OfflineOperationType.patch,
-      modelKey: model.key,
+      modelKey: dataAdapter.key(model) ?? '',
       path: path,
       headers: headers,
       query: query,
       body: serialize(model)..addAll(body ?? {}),
     );
-    await localRepository.save(model.key, model);
-    var isLocalModel = model.key.toString().startsWith(tempKey);
+    await localRepository.save(dataAdapter.key(model) ?? '', model);
+    var isLocalModel = dataAdapter.key(model).toString().startsWith(tempKey);
     if (isLocalModel) {
       await offlineRepository.save(offlineOperation);
       return model;
@@ -373,7 +379,7 @@ abstract class _RemoteRepository<T extends DataModel<T>> {
       url: path ??
           url(
               method: RequestMethod.patch,
-              pathParams: {'id': model.id.toString()}),
+              pathParams: {'id': dataAdapter.key(model) ?? ''}),
       method: RequestMethod.patch,
       headers: headers,
       query: query,

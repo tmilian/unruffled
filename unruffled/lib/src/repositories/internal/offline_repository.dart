@@ -1,6 +1,6 @@
 part of unruffled;
 
-class OfflineRepository<T extends DataModel<T>>
+class OfflineRepository<T extends DataModel>
     with TypeAdapter<OfflineOperation> {
   OfflineRepository({
     required this.dataAdapter,

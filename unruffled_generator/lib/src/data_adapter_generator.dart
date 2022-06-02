@@ -57,6 +57,11 @@ class DataAdapterGenerator extends GeneratorForAnnotation<UnruffledData> {
       displayName =
           instantiatedMixinType.getDisplayString(withNullability: false);
     } catch (e) {}
+    final visitor = ModelVisitor();
+    element.visitChildren(visitor);
+    if (visitor.ids.length != 1) {
+      throw UnsupportedError('Ensure to define a unique @Id annotation');
+    }
     final serviceName = annotation.peek('serviceName')?.stringValue;
     StringBuffer buffer = StringBuffer();
     buffer.writeln('''
@@ -66,6 +71,9 @@ class DataAdapterGenerator extends GeneratorForAnnotation<UnruffledData> {
 
       @override
       ${element.name} deserialize(Map<String, dynamic> map) => _\$${element.name}FromJson(map);
+      
+      @override
+      String? key(${element.name}? model) => model?.${visitor.ids.keys.first}${visitor.ids.values.first ? '?' : ''}.toString() ?? model?.unruffledKey;
     ''');
     if (serviceName != null) {
       buffer.writeln('''
@@ -84,12 +92,20 @@ class DataAdapterGenerator extends GeneratorForAnnotation<UnruffledData> {
       ${element.name}Repository() : super(${element.name}Adapter());
     }
     ''');
-    final visitor = ModelVisitor();
-    element.visitChildren(visitor);
     buffer.writeln(
         'class ${element.name}Field extends UnruffledField<${element.name}> {');
     for (final field in visitor.fields.keys) {
       buffer.writeln("${element.name}Field.$field() : super('$field');");
+    }
+    buffer.writeln('}');
+    final isNullable = visitor.ids.values.first;
+    buffer.writeln('''
+    extension ${element.name}UnruffledExt on ${element.name} {''');
+    if (isNullable) {
+      buffer.writeln(
+          'String get key => ${visitor.ids.keys.first}?.toString() ?? unruffledKey;');
+    } else {
+      buffer.writeln('String get key => ${visitor.ids.keys.first}.toString();');
     }
     buffer.writeln('}');
     return buffer.toString();
@@ -99,6 +115,7 @@ class DataAdapterGenerator extends GeneratorForAnnotation<UnruffledData> {
 class ModelVisitor extends SimpleElementVisitor<void> {
   late String className;
   final fields = <String, dynamic>{};
+  final ids = <String, bool>{};
 
   @override
   void visitConstructorElement(ConstructorElement element) {
@@ -109,6 +126,16 @@ class ModelVisitor extends SimpleElementVisitor<void> {
   @override
   void visitFieldElement(FieldElement element) {
     final elementType = element.type.toString();
+    if (methodHasAnnotation(Id, element)) {
+      ids[element.name] =
+          element.type.nullabilitySuffix == NullabilitySuffix.question;
+    }
     fields[element.name] = elementType.replaceFirst('*', '');
+  }
+
+  bool methodHasAnnotation(Type annotationType, FieldElement element) {
+    final annotations =
+        TypeChecker.fromRuntime(annotationType).annotationsOf(element);
+    return annotations.isNotEmpty;
   }
 }

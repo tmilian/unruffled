@@ -7,15 +7,13 @@ part of 'book.dart';
 // **************************************************************************
 
 Book _$BookFromJson(Map<String, dynamic> json) => Book(
-      key: json['key'] as String?,
-      id: json['id'] as int?,
+      unruffledKey: json['unruffledKey'] as String?,
       title: json['title'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),
     );
 
 Map<String, dynamic> _$BookToJson(Book instance) => <String, dynamic>{
-      'key': instance.key,
-      'id': instance.id,
+      'unruffledKey': instance.unruffledKey,
       'title': instance.title,
       'createdAt': instance.createdAt.toIso8601String(),
     };
@@ -30,17 +28,23 @@ class BookAdapter extends DataAdapter<Book> {
 
   @override
   Book deserialize(Map<String, dynamic> map) => _$BookFromJson(map);
+
+  @override
+  String? key(Book? model) => model?.title.toString() ?? model?.unruffledKey;
 }
 
 class $BookRemoteRepository = RemoteRepository<Book>
-    with FeathersJsRemoteRepository<Book>;
+    with CustomRemoteRepository<Book>;
 
 class BookRepository extends $BookRemoteRepository {
   BookRepository() : super(BookAdapter());
 }
 
 class BookField extends UnruffledField<Book> {
-  BookField.id() : super('id');
   BookField.title() : super('title');
   BookField.createdAt() : super('createdAt');
+}
+
+extension BookUnruffledExt on Book {
+  String get key => title.toString();
 }

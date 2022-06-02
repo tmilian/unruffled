@@ -6,7 +6,7 @@ part of 'offline_operation.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-OfflineOperation<T> _$OfflineOperationFromJson<T extends DataModel<T>>(
+OfflineOperation<T> _$OfflineOperationFromJson<T extends DataModel>(
         Map<String, dynamic> json) =>
     OfflineOperation<T>(
       key: json['key'] as String?,
@@ -20,7 +20,7 @@ OfflineOperation<T> _$OfflineOperationFromJson<T extends DataModel<T>>(
       body: json['body'] as Map<String, dynamic>?,
     );
 
-Map<String, dynamic> _$OfflineOperationToJson<T extends DataModel<T>>(
+Map<String, dynamic> _$OfflineOperationToJson<T extends DataModel>(
         OfflineOperation<T> instance) =>
     <String, dynamic>{
       'key': instance.key,

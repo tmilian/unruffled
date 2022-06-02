@@ -1,6 +1,6 @@
 part of unruffled;
 
-abstract class LocalRepository<T extends DataModel<T>> {
+abstract class LocalRepository<T extends DataModel> {
   LocalRepository(this.dataAdapter);
 
   Future<LocalRepository<T>> initialize();
@@ -12,8 +12,6 @@ abstract class LocalRepository<T extends DataModel<T>> {
   Future<List<T>> getAll({QueryBuilder<T>? queryBuilder});
 
   Future<T?> get(String? key);
-
-  Future<T?> getFromId(Object? id);
 
   Future<T> save(String key, T model);
 

@@ -16,3 +16,7 @@ dependencies:
 dev_dependencies:
   lints: ^1.0.0
   test: ^1.16.0
+
+dependency_overrides:
+  unruffled:
+    path: ../unruffled

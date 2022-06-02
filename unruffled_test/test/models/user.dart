@@ -5,15 +5,15 @@ part 'user.g.dart';
 
 @UnruffledData(serviceName: 'service/users')
 @JsonSerializable()
-class User extends DataModel<User> {
-  @override
+class User extends DataModel {
+  @Id()
   int? id;
   String name;
   String surname;
   int age;
 
   User({
-    super.key,
+    super.unruffledKey,
     this.id,
     required this.name,
     required this.surname,

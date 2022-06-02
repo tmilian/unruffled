@@ -23,7 +23,7 @@ class Unruffled {
 
   final List<RemoteRepository> _remoteRepositories = [];
 
-  Unruffled registerRepository<T extends DataModel<T>>(
+  Unruffled registerRepository<T extends DataModel>(
     RemoteRepository<T> remoteRepository,
   ) {
     _remoteRepositories.add(remoteRepository);
@@ -39,13 +39,13 @@ class Unruffled {
     return this;
   }
 
-  RemoteRepository<T> repository<T extends DataModel<T>>() {
+  RemoteRepository<T> repository<T extends DataModel>() {
     for (var element in _remoteRepositories) {
       if (element is RemoteRepository<T>) {
         return element;
       }
     }
-    throw ("It seems that your class ${T.toString()} doesn't have a ${T.toString()}Adapter() registered");
+    throw ("It seems that your class ${T.toString()} doesn't have a ${T.toString()}Repository() registered");
   }
 
   Map<RemoteRepository, List<OfflineOperation>> get offlineOperations =>

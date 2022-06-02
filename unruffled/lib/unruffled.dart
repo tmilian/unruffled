@@ -16,6 +16,7 @@ import 'package:unruffled/src/models/offline/offline_operation.dart';
 import 'package:uuid/uuid.dart';
 
 export 'src/annotations/unruffled_data.dart';
+export 'src/annotations/unruffled_id.dart';
 export 'src/models/offline/offline_operation.dart';
 
 part 'src/extensions/dynamic.dart';

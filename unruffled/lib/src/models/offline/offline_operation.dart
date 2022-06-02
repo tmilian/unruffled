@@ -12,7 +12,7 @@ part 'offline_operation.g.dart';
 /// Offline operation does not support custom operations at this time
 ///
 @JsonSerializable()
-class OfflineOperation<T extends DataModel<T>> {
+class OfflineOperation<T extends DataModel> {
   final String key;
   final OfflineOperationType type;
   final String modelKey;
