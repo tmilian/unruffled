@@ -6,15 +6,15 @@ part 'book.g.dart';
 
 @UnruffledFeathersJsData(serviceName: 'service/books')
 @JsonSerializable()
-class Book extends DataModel<Book> {
-  @override
+class Book extends DataModel {
+  @Id()
   int? id;
   String title;
   int pages;
   DateTime createdAt;
 
   Book({
-    super.key,
+    super.unruffledKey,
     this.id,
     required this.title,
     required this.pages,

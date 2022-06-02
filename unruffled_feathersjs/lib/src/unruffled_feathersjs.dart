@@ -86,7 +86,7 @@ class UnruffledFeathersJs extends Unruffled {
   }
 
   @override
-  FeathersJsRemoteRepository<T> repository<T extends DataModel<T>>() {
+  FeathersJsRemoteRepository<T> repository<T extends DataModel>() {
     return super.repository<T>() as FeathersJsRemoteRepository<T>;
   }
 }

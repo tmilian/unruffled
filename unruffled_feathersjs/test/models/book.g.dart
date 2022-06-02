@@ -7,7 +7,7 @@ part of 'book.dart';
 // **************************************************************************
 
 Book _$BookFromJson(Map<String, dynamic> json) => Book(
-      key: json['key'] as String?,
+      unruffledKey: json['unruffledKey'] as String?,
       id: json['id'] as int?,
       title: json['title'] as String,
       pages: json['pages'] as int,
@@ -15,7 +15,7 @@ Book _$BookFromJson(Map<String, dynamic> json) => Book(
     );
 
 Map<String, dynamic> _$BookToJson(Book instance) => <String, dynamic>{
-      'key': instance.key,
+      'unruffledKey': instance.unruffledKey,
       'id': instance.id,
       'title': instance.title,
       'pages': instance.pages,
@@ -34,6 +34,9 @@ class BookAdapter extends DataAdapter<Book> {
   Book deserialize(Map<String, dynamic> map) => _$BookFromJson(map);
 
   @override
+  String? key(Book? model) => model?.id?.toString() ?? model?.unruffledKey;
+
+  @override
   String get serviceName => 'service/books';
 }
 
@@ -49,4 +52,8 @@ class BookField extends UnruffledField<Book> {
   BookField.title() : super('title');
   BookField.pages() : super('pages');
   BookField.createdAt() : super('createdAt');
+}
+
+extension BookUnruffledExt on Book {
+  String get key => id?.toString() ?? unruffledKey;
 }

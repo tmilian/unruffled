@@ -26,3 +26,9 @@ dev_dependencies:
   http_mock_adapter: ^0.3.2
   lints: ^1.0.0
   test: ^1.16.0
+
+dependency_overrides:
+  unruffled:
+    path: ../unruffled
+  unruffled_generator:
+    path: ../unruffled_generator

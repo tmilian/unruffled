@@ -1,7 +1,6 @@
 part of unruffled_feathersjs;
 
-mixin FeathersJsRemoteRepository<T extends DataModel<T>>
-    on RemoteRepository<T> {
+mixin FeathersJsRemoteRepository<T extends DataModel> on RemoteRepository<T> {
   Future<Paginate<T>?> getAllPaginated({
     String? path,
     bool local = false,
@@ -41,7 +40,9 @@ mixin FeathersJsRemoteRepository<T extends DataModel<T>>
             data.containsKey(pageKey)) {
           var deserialized = deserialize(data[listKey]);
           for (var model in deserialized.models) {
-            await localRepository.save(model.key, model);
+            final key = dataAdapter.key(model);
+            if (key == null) continue;
+            await localRepository.save(key, model);
           }
           var models = deserialized.models;
           return Paginate(

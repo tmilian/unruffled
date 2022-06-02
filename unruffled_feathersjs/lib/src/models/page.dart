@@ -1,6 +1,6 @@
 part of unruffled_feathersjs;
 
-class Paginate<T extends DataModel<T>> {
+class Paginate<T extends DataModel> {
   int total;
   int limit;
   int skip;
