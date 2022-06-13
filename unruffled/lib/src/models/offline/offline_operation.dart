@@ -11,7 +11,7 @@ part 'offline_operation.g.dart';
 ///
 /// Offline operation does not support custom operations at this time
 ///
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, anyMap: true)
 class OfflineOperation<T extends DataModel> {
   final String key;
   final OfflineOperationType type;

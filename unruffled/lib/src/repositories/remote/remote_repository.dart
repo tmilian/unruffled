@@ -243,6 +243,7 @@ abstract class _RemoteRepository<T extends DataModel> {
     bool remote = false,
     OfflineExceptionCallback? onOfflineException,
   }) async {
+    body = serialize(model)..addAll(body ?? {});
     final offlineOperation = OfflineOperation<T>(
       type: OfflineOperationType.post,
       modelKey: dataAdapter.key(model) ?? '',
@@ -258,7 +259,7 @@ abstract class _RemoteRepository<T extends DataModel> {
       method: RequestMethod.post,
       headers: headers,
       query: query,
-      body: serialize(model)..addAll(body ?? {}),
+      body: body,
       onSuccess: (data) async {
         var deserialized = deserialize(data);
         var newModel = deserialized.model;
@@ -301,6 +302,7 @@ abstract class _RemoteRepository<T extends DataModel> {
     bool remote = false,
     OfflineExceptionCallback? onOfflineException,
   }) async {
+    body = serialize(model)..addAll(body ?? {});
     final offlineOperation = OfflineOperation<T>(
       type: OfflineOperationType.put,
       modelKey: dataAdapter.key(model) ?? '',
@@ -323,7 +325,7 @@ abstract class _RemoteRepository<T extends DataModel> {
       method: RequestMethod.put,
       headers: headers,
       query: query,
-      body: serialize(model)..addAll(body ?? {}),
+      body: body,
       onSuccess: (data) async {
         var deserialized = deserialize(data);
         await offlineRepository.delete(offlineOperation);
@@ -361,13 +363,14 @@ abstract class _RemoteRepository<T extends DataModel> {
     bool remote = false,
     OfflineExceptionCallback? onOfflineException,
   }) async {
+    body = serialize(model)..addAll(body ?? {});
     final offlineOperation = OfflineOperation<T>(
       type: OfflineOperationType.patch,
       modelKey: dataAdapter.key(model) ?? '',
       path: path,
       headers: headers,
       query: query,
-      body: serialize(model)..addAll(body ?? {}),
+      body: body,
     );
     await localRepository.save(dataAdapter.key(model) ?? '', model);
     var isLocalModel = dataAdapter.key(model).toString().startsWith(tempKey);
@@ -383,6 +386,7 @@ abstract class _RemoteRepository<T extends DataModel> {
       method: RequestMethod.patch,
       headers: headers,
       query: query,
+      body: body,
       onSuccess: (data) async {
         var deserialized = deserialize(data);
         await offlineRepository.delete(offlineOperation);
@@ -448,6 +452,7 @@ abstract class _RemoteRepository<T extends DataModel> {
 
   Future<void> dispose() async {
     await localRepository.dispose();
+    await offlineRepository.dispose();
   }
 
   Map<String, dynamic> parseQuery({required QueryBuilder<T> queryBuilder});

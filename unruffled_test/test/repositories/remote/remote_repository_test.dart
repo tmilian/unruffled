@@ -213,6 +213,161 @@ void main() async {
     });
   });
 
+  group('PATCH', () {
+    final testUserId = 300;
+    final testUser = User(
+      name: 'Jane',
+      surname: 'Doe',
+    );
+    final patchUser = User(
+      id: testUserId,
+      name: testUser.name,
+      surname: testUser.surname,
+    );
+
+    group('Remote synced model', () {
+      group('Request succeed', () {
+        test('Request', () async {
+          // Create remote user
+          var route = repository.url(
+            method: RequestMethod.patch,
+            pathParams: {'id': '$testUserId'},
+          );
+          dioAdapter.onPatch(route, (server) {
+            return server.reply(200, patchUser);
+          }, data: patchUser.toJson());
+          var user = await repository.patch(model: patchUser);
+          print('Remote model ${user.toJson()}');
+          expect(user.id, testUserId);
+        });
+
+        test('Check user synced in local', () async {
+          // Check if remote user has been synced in local
+          var localUser = await repository.get(key: testUserId, local: true);
+          print('Local model ${localUser?.toJson()}');
+          expect(localUser?.id, testUserId);
+        });
+      });
+
+      group('Request failed', () {
+        test('Request', () async {
+          // Create remote user
+          var route = repository.url(
+            method: RequestMethod.patch,
+            pathParams: {'id': '$testUserId'},
+          );
+          dioAdapter.onPatch(
+            route,
+            (server) {
+              return server.reply(500, 'Internal server error');
+            },
+            data: patchUser.toJson(),
+          );
+          expect(() async {
+            await repository.patch(model: patchUser);
+          }, throwsA(isA<DataException>()));
+        });
+
+        test('Check user synced in local', () async {
+          // Check if remote user has been synced in local
+          var localUser = await repository.get(key: testUserId, local: true);
+          print('Local model ${localUser?.toJson()}');
+          expect(localUser?.id, testUserId);
+        });
+      });
+
+      group('Connectivity error', () {
+        test('Request', () async {
+          // Create remote user
+          var route = repository.url(
+            method: RequestMethod.patch,
+            pathParams: {'id': '$testUserId'},
+          );
+          dioAdapter.onPatch(route, (server) {
+            return server.throws(
+              504,
+              DioError(
+                requestOptions: RequestOptions(path: route),
+                error: 'Connection closed before full header was received',
+              ),
+            );
+          }, data: patchUser.toJson());
+          var user = await repository.patch(model: patchUser);
+          expect(user.id, testUserId);
+        });
+
+        test('Check offline operation has been added', () async {
+          // Check that no offline operations has been added
+          var operations = repository.offlineOperations;
+          var localUser = await repository.get(key: testUserId, local: true);
+          expect(
+              operations.firstWhereOrNull((e) =>
+                  e.modelKey == localUser?.key &&
+                  e.type == OfflineOperationType.patch),
+              isNotNull);
+          expect(operations.length, 1);
+        });
+
+        test('Fail to retry offline operation', () async {
+          var operation = repository.offlineOperations.firstWhere(
+              (element) => element.type == OfflineOperationType.patch);
+          var route = repository.url(
+            method: RequestMethod.patch,
+            pathParams: {'id': '$testUserId'},
+          );
+          dioAdapter.onPatch(route, (server) {
+            return server.throws(
+              504,
+              DioError(
+                requestOptions: RequestOptions(path: route),
+                error: 'Connection closed before full header was received',
+              ),
+            );
+          }, data: patchUser.toJson());
+          await operation.retry(repository);
+          var localUser = await repository.get(key: testUserId, local: true);
+          expect(
+            repository.offlineOperations.firstWhereOrNull(
+              (e) => e.modelKey == localUser?.key,
+            ),
+            isNotNull,
+          );
+          expect(repository.offlineOperations.length, 1);
+        });
+
+        test('Succeed to retry offline operation', () async {
+          var operation = repository.offlineOperations.firstWhere(
+              (element) => element.type == OfflineOperationType.patch);
+          var route = repository.url(
+            method: RequestMethod.patch,
+            pathParams: {'id': '$testUserId'},
+          );
+          dioAdapter.onPatch(route, (server) {
+            return server.reply(200, patchUser);
+          }, data: patchUser.toJson());
+          await operation.retry(repository);
+          expect(repository.offlineOperations.length, 0);
+        });
+      });
+    });
+
+    group('Remote non-synced model', () {
+      test('Edit model', () async {
+        var user = await repository.patch(model: testUser);
+        print('Remote model ${user.toJson()}');
+        expect(testUser.key, user.key);
+      });
+
+      test('Check no offline operation has been added', () async {
+        // Check that no offline operations has been added
+        var operations = repository.offlineOperations;
+        var localUser = await repository.get(key: testUser.key, local: true);
+        expect(operations.firstWhereOrNull((e) => e.modelKey == localUser?.key),
+            isNull);
+      });
+    });
+  });
+
   group('PUT', () {
     final testUserId = 300;
     final testUser = User(

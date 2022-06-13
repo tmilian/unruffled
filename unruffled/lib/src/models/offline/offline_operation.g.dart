@@ -6,18 +6,21 @@ part of 'offline_operation.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-OfflineOperation<T> _$OfflineOperationFromJson<T extends DataModel>(
-        Map<String, dynamic> json) =>
+OfflineOperation<T> _$OfflineOperationFromJson<T extends DataModel>(Map json) =>
     OfflineOperation<T>(
       key: json['key'] as String?,
       type: $enumDecode(_$OfflineOperationTypeEnumMap, json['type']),
       modelKey: json['modelKey'] as String,
       path: json['path'] as String?,
-      headers: (json['headers'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, e as String),
+      headers: (json['headers'] as Map?)?.map(
+        (k, e) => MapEntry(k as String, e as String),
       ),
-      query: json['query'] as Map<String, dynamic>?,
-      body: json['body'] as Map<String, dynamic>?,
+      query: (json['query'] as Map?)?.map(
+        (k, e) => MapEntry(k as String, e),
+      ),
+      body: (json['body'] as Map?)?.map(
+        (k, e) => MapEntry(k as String, e),
+      ),
     );
 
 Map<String, dynamic> _$OfflineOperationToJson<T extends DataModel>(
