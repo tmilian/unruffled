@@ -1,3 +1,7 @@
+## 1.7.0
+
+- unruffled 1.8.0
+
 ## 1.6.0
 
 - Support @Id annotation on DataModel
