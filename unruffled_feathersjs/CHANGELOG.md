@@ -1,3 +1,8 @@
+## 1.9.0
+
+- unruffled 1.8.0
+- unruffled_generator 1.7.0
+
 ## 1.8.0
 
 - Implements @Id annotation
