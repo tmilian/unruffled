@@ -1,3 +1,8 @@
+## 1.8.0
+
+- Fix body in offline operations
+- Fix body parsing in PATCH request
+
 ## 1.7.0
 
 - Introduce @Id() annotation to define a unique id in DataModel
