@@ -81,8 +81,11 @@ class LocalRepositoryImpl<T extends DataModel> extends LocalRepository<T>
     final numOfFields = reader.readByte();
     var fields = <String, dynamic>{};
     for (int i = 0; i < numOfFields; i++) {
-      var name = reader.read().toString();
+      final name = reader.read().toString();
       var value = reader.read();
+      if (value is Map) {
+        value = value.cast<String, dynamic>();
+      }
       fields[name] = value;
     }
     return dataAdapter.deserialize(fields);
