@@ -1,3 +1,7 @@
+## 1.9.0
+
+- Fix map parsing in hive storage
+
 ## 1.8.0
 
 - Fix body in offline operations
