@@ -31,13 +31,18 @@ class DataAdapterGenerator extends GeneratorForAnnotation<UnruffledData> {
       throw ('Class needs an unnamed constructor.');
     }
     final remoteAdapterTypeChecker = TypeChecker.fromRuntime(RemoteRepository);
-    String? displayName;
+    List<String> mixins = [];
     try {
       var obj = annotation.read('adapter').objectValue;
       final mixinType = obj.toTypeValue() as ParameterizedType;
-      final mixinMethods = <MethodElement>[];
 
       final args = mixinType.typeArguments;
+
+      final mixinElement = mixinType.element2;
+
+      if (mixinElement is! ClassElement) {
+        throw UnsupportedError('Ensure that your mixin is correctly defined');
+      }
 
       if (args.length > 1) {
         throw UnsupportedError(
@@ -48,14 +53,18 @@ class DataAdapterGenerator extends GeneratorForAnnotation<UnruffledData> {
         throw UnsupportedError(
             'Adapter `$mixinType` MUST have a constraint `on` RemoteAdapter<$classType>');
       }
-
-      final instantiatedMixinType = (mixinType.element as ClassElement)
-          .instantiate(
+      for (var value in mixinElement.allSupertypes) {
+        if (value.element2 is MixinElement && !value.element2.isPrivate) {
+          final mixinType = (value.element2 as ClassElement).instantiate(
               typeArguments: [if (args.isNotEmpty) element.thisType],
               nullabilitySuffix: NullabilitySuffix.none);
-      mixinMethods.addAll(instantiatedMixinType.methods);
-      displayName =
-          instantiatedMixinType.getDisplayString(withNullability: false);
+          mixins.add(mixinType.getDisplayString(withNullability: false));
+        }
+      }
+      final mainType = (mixinType.element2 as ClassElement).instantiate(
+          typeArguments: [if (args.isNotEmpty) element.thisType],
+          nullabilitySuffix: NullabilitySuffix.none);
+      mixins.add(mainType.getDisplayString(withNullability: false));
     } catch (e) {}
     final visitor = ModelVisitor();
     element.visitChildren(visitor);
@@ -82,13 +91,13 @@ class DataAdapterGenerator extends GeneratorForAnnotation<UnruffledData> {
       ''');
     }
     buffer.writeln('}');
-    if (displayName != null) {
+    if (mixins.isNotEmpty) {
       buffer.writeln('''
-      class \$${element.name}RemoteRepository = RemoteRepository<${element.name}> with $displayName;
+      class \$${element.name}RemoteRepository = RemoteRepository<${element.name}> with ${mixins.join(', ')};
       ''');
     }
     buffer.writeln('''
-    class ${element.name}Repository extends ${displayName != null ? '\$${element.name}RemoteRepository' : 'RemoteRepository<${element.name}>'} {
+    class ${element.name}Repository extends ${mixins.isNotEmpty ? '\$${element.name}RemoteRepository' : 'RemoteRepository<${element.name}>'} {
       ${element.name}Repository() : super(${element.name}Adapter());
     }
     ''');

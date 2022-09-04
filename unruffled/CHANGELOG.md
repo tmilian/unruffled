@@ -1,3 +1,7 @@
+## 1.11.0
+
+- Update dependencies
+
 ## 1.9.0
 
 - Fix map parsing in hive storage
